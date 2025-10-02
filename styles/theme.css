@@ -1,0 +1,141 @@
+/* Styles dynamiques pour le thème */
+
+/* Variables CSS par défaut */
+:root {
+  --theme-posts: #3B82F6;
+  --theme-borders: #E5E7EB;
+  --theme-bg: #F9FAFB;
+  --theme-text: #111827;
+  --theme-font: Helvetica;
+}
+
+/* Appliquer la police du thème */
+body {
+  font-family: var(--theme-font), sans-serif !important;
+}
+
+/* Styles pour les posts/cartes */
+.theme-post-bg {
+  background-color: var(--theme-posts) !important;
+}
+
+.theme-post-text {
+  color: var(--theme-posts) !important;
+}
+
+.theme-border {
+  border-color: var(--theme-borders) !important;
+}
+
+.theme-bg {
+  background-color: var(--theme-bg) !important;
+}
+
+.theme-text {
+  color: var(--theme-text) !important;
+}
+
+/* Override des couleurs Tailwind avec les variables CSS */
+.bg-primary {
+  background-color: var(--theme-posts) !important;
+}
+
+.text-primary {
+  color: var(--theme-posts) !important;
+}
+
+.border-primary {
+  border-color: var(--theme-posts) !important;
+}
+
+/* Variantes avec opacité */
+.border-primary\/20 {
+  border-color: color-mix(in srgb, var(--theme-posts) 20%, transparent) !important;
+}
+
+.border-primary\/30 {
+  border-color: color-mix(in srgb, var(--theme-posts) 30%, transparent) !important;
+}
+
+.bg-primary\/10 {
+  background-color: color-mix(in srgb, var(--theme-posts) 10%, transparent) !important;
+}
+
+.bg-primary\/90 {
+  background-color: color-mix(in srgb, var(--theme-posts) 90%, black) !important;
+}
+
+.hover\:bg-primary\/90:hover {
+  background-color: color-mix(in srgb, var(--theme-posts) 90%, black) !important;
+}
+
+.hover\:bg-primary\/10:hover {
+  background-color: color-mix(in srgb, var(--theme-posts) 10%, transparent) !important;
+}
+
+.hover\:border-primary\/30:hover {
+  border-color: color-mix(in srgb, var(--theme-posts) 30%, transparent) !important;
+}
+
+.text-primary-foreground {
+  color: white !important;
+}
+
+.hover\:text-primary:hover {
+  color: var(--theme-posts) !important;
+}
+
+/* Gris personnalisables */
+.bg-gray-50 {
+  background-color: var(--theme-bg) !important;
+}
+
+.border-gray-100 {
+  border-color: var(--theme-borders) !important;
+}
+
+.border-gray-200 {
+  border-color: var(--theme-borders) !important;
+}
+
+/* Pour les boutons et éléments interactifs */
+.btn-primary {
+  background-color: var(--theme-posts) !important;
+  border-color: var(--theme-posts) !important;
+}
+
+.btn-primary:hover {
+  background-color: color-mix(in srgb, var(--theme-posts) 90%, black) !important;
+}
+
+/* Boutons avec background en dur */
+.bg-blue-600 {
+  background-color: var(--theme-posts) !important;
+}
+
+.text-blue-600 {
+  color: var(--theme-posts) !important;
+}
+
+.hover\:bg-gray-50:hover {
+  background-color: color-mix(in srgb, var(--theme-bg) 95%, white) !important;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: color-mix(in srgb, var(--theme-borders) 80%, white) !important;
+}
+
+/* Pour les badges de catégorie */
+.category-badge {
+  border-color: var(--theme-borders) !important;
+}
+
+/* Pour les inputs et textarea */
+.theme-input {
+  border-color: var(--theme-borders) !important;
+}
+
+.theme-input:focus {
+  border-color: var(--theme-posts) !important;
+  outline: 2px solid color-mix(in srgb, var(--theme-posts) 20%, transparent) !important;
+}

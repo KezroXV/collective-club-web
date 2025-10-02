@@ -1,0 +1,69 @@
+User-agent: *
+Allow: /
+
+# Pages importantes à indexer
+Allow: /community
+Allow: /community/posts/
+Allow: /community/categories/
+
+# Pages d'authentification - indexation limitée
+Disallow: /auth/
+Disallow: /login
+Disallow: /register
+
+# Dashboard administrateur - privé
+Disallow: /dashboard/
+Disallow: /admin/
+
+# API endpoints - ne pas indexer
+Disallow: /api/
+
+# Fichiers système Next.js
+Disallow: /_next/
+Disallow: /static/
+
+# Pages de développement et test
+Disallow: /test/
+Disallow: /dev/
+
+# Fichiers de configuration
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*.txt$
+
+# Paramètres URL à éviter pour éviter le contenu dupliqué
+Disallow: /*?*utm_source=
+Disallow: /*?*utm_medium=
+Disallow: /*?*utm_campaign=
+Disallow: /*?*fbclid=
+Disallow: /*?*gclid=
+
+# Sitemap
+Sitemap: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sitemap.xml
+
+# Politeness - délai entre requêtes (en secondes)
+Crawl-delay: 1
+
+# Directives spécifiques pour Googlebot
+User-agent: Googlebot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /auth/
+
+# Directives pour Bingbot  
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /auth/
+
+# Bloquer les bots malveillants connus
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot  
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

@@ -1,0 +1,327 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant motion-safe (@media (prefers-reduced-motion: no-preference));
+@custom-variant motion-reduce (@media (prefers-reduced-motion: reduce));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  /* chart-6 est bien fonctionnel si la variable CSS --chart-6 est définie dans :root plus bas dans ce fichier. 
+     Vérifiez que vous avez bien une ligne du type : --chart-6: #xxxxxx; ou équivalent dans :root. */
+  --color-chart-6: var(--chart-6);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Premium Animation Variables */
+  --animation-duration-fast: 150ms;
+  --animation-duration-normal: 200ms;
+  --animation-duration-slow: 300ms;
+
+  /* Post Detail Layout Variables */
+  --post-layout-gap: 2rem;
+  --sidebar-width: 320px;
+  --animation-duration-slower: 500ms;
+
+  /* Premium Shadow Variables */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-premium: 0 10px 25px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glow-primary: 0 0 20px
+    color-mix(in srgb, var(--primary) 30%, transparent);
+  --shadow-glow-secondary: 0 0 20px
+    color-mix(in srgb, var(--secondary) 30%, transparent);
+  --shadow-glow-accent: 0 0 20px
+    color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+:root {
+  --radius: 0.625rem;
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: #345ff8; /* Bleu foncé */
+  --primary-foreground: #ffffff;
+  --secondary: #6083f9; /* Bleu violet */
+  --secondary-foreground: #ffffff;
+  --muted: #dde5ff; /* Bleu clair 3 */
+  --muted-foreground: #1f2937;
+  --accent: #88a9fa; /* Bleu clair 1 */
+  --accent-foreground: #0a0a0a;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: #88a9fa;
+  --chart-1: #345ff8;
+  --chart-2: #6083f9;
+  --chart-3: #88a9fa;
+  --chart-4: #b2d2fc; /* Bleu clair 2 */
+  --chart-5: #dde5ff; /* Bleu clair 3 */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: #345ff8;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.705 0.015 286.067);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+
+  /* Premium Color Extensions */
+  --primary-50: color-mix(in srgb, var(--primary) 5%, white);
+  --primary-100: color-mix(in srgb, var(--primary) 10%, white);
+  --primary-200: color-mix(in srgb, var(--primary) 20%, white);
+  --primary-300: color-mix(in srgb, var(--primary) 30%, white);
+  --primary-400: color-mix(in srgb, var(--primary) 40%, white);
+  --primary-500: var(--primary);
+  --primary-600: color-mix(in srgb, var(--primary) 90%, black);
+  --primary-700: color-mix(in srgb, var(--primary) 80%, black);
+  --primary-800: color-mix(in srgb, var(--primary) 70%, black);
+  --primary-900: color-mix(in srgb, var(--primary) 60%, black);
+
+  /* State Colors */
+  --success: hsl(120, 84%, 45%);
+  --success-foreground: white;
+  --warning: hsl(45, 84%, 55%);
+  --warning-foreground: hsl(45, 84%, 15%);
+  --info: hsl(210, 84%, 55%);
+  --info-foreground: white;
+}
+
+.dark {
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: #345ff8;
+  --primary-foreground: #ffffff;
+  --secondary: #6083f9;
+  --secondary-foreground: #ffffff;
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: #88a9fa;
+  --accent-foreground: #0a0a0a;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #88a9fa;
+  --chart-1: #345ff8;
+  --chart-2: #6083f9;
+  --chart-3: #88a9fa;
+  --chart-4: #b2d2fc;
+  --chart-5: #dde5ff;
+  --chart-6: #fafbff;
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: #345ff8;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.552 0.016 285.938);
+
+  /* Premium Color Extensions for Dark Mode */
+  --primary-50: color-mix(
+    in srgb,
+    var(--primary) 5%,
+    oklch(0.141 0.005 285.823)
+  );
+  --primary-100: color-mix(
+    in srgb,
+    var(--primary) 10%,
+    oklch(0.141 0.005 285.823)
+  );
+  --primary-200: color-mix(
+    in srgb,
+    var(--primary) 20%,
+    oklch(0.141 0.005 285.823)
+  );
+  --primary-300: color-mix(
+    in srgb,
+    var(--primary) 30%,
+    oklch(0.141 0.005 285.823)
+  );
+  --primary-400: color-mix(
+    in srgb,
+    var(--primary) 40%,
+    oklch(0.141 0.005 285.823)
+  );
+  --primary-500: var(--primary);
+  --primary-600: color-mix(in srgb, var(--primary) 90%, white);
+  --primary-700: color-mix(in srgb, var(--primary) 80%, white);
+  --primary-800: color-mix(in srgb, var(--primary) 70%, white);
+  --primary-900: color-mix(in srgb, var(--primary) 60%, white);
+
+  /* State Colors for Dark Mode */
+  --success: hsl(120, 84%, 55%);
+  --success-foreground: hsl(120, 84%, 15%);
+  --warning: hsl(45, 84%, 65%);
+  --warning-foreground: hsl(45, 84%, 15%);
+  --info: hsl(210, 84%, 65%);
+  --info-foreground: hsl(210, 84%, 15%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Premium Animations */
+@layer utilities {
+  /* Shimmer animation for badges */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible improvements */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  /* Premium hover states */
+  .hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-200 hover:shadow-lg;
+  }
+
+  .hover-glow-primary {
+    @apply hover:shadow-[0_0_20px_rgba(52,95,248,0.3)];
+  }
+
+  .hover-glow-secondary {
+    @apply hover:shadow-[0_0_20px_rgba(96,131,249,0.3)];
+  }
+
+  /* Glass morphism effects */
+  .glass {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  }
+
+  .glass-dark {
+    @apply bg-black/10 backdrop-blur-sm border border-white/10;
+  }
+
+  /* Motion safe animations */
+  @media (prefers-reduced-motion: reduce) {
+    .motion-safe\:animate-in {
+      animation: none !important;
+    }
+
+    .motion-safe\:transition-all {
+      transition: none !important;
+    }
+  }
+
+  /* Post Detail Layout Utilities */
+  .post-layout {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+  }
+
+  .post-main-content {
+    @apply lg:col-span-2;
+  }
+
+  .post-sidebar {
+    @apply space-y-6;
+  }
+
+  /* Line clamping utilities */
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .post-sidebar {
+      order: -1; /* Sidebar appears before content on mobile */
+    }
+
+    .post-layout {
+      @apply gap-6; /* Reduced gap on mobile */
+    }
+  }
+}
