@@ -2,7 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
-import { getCurrentShopId } from "@/lib/shop-context";
+import { getCurrentShopId, createDefaultRolesForShop } from "@/lib/shop-context";
 
 export const authOptions: NextAuthOptions = {
   // ✅ Ne pas utiliser PrismaAdapter pour multi-tenant - gérer manuellement
@@ -69,6 +69,17 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!shopUser) {
+            // ✅ SÉCURITÉ : Vérifier que les rôles existent pour ce shop
+            const rolesCount = await prisma.role.count({
+              where: { shopId: shopId }
+            });
+
+            if (rolesCount === 0) {
+              // Créer les rôles si manquants (fallback de sécurité)
+              console.log(`⚠️ Rôles manquants pour shopId ${shopId}, création automatique...`);
+              await createDefaultRolesForShop(shopId);
+            }
+
             // Vérifier si un admin existe déjà
             const existingAdmin = await prisma.user.findFirst({
               where: {

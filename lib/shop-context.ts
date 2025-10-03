@@ -1,6 +1,45 @@
 import { headers, cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
+// ✅ Fonction pour créer les 3 rôles par défaut lors de la création d'un shop
+export async function createDefaultRolesForShop(shopId: string) {
+  const defaultRoles = [
+    {
+      name: "ADMIN",
+      displayName: "Administrateur",
+      color: "#EF4444",
+      permissions: ["MANAGE_USERS", "MANAGE_POSTS", "MANAGE_COMMENTS", "DELETE_POSTS", "DELETE_COMMENTS", "BAN_USERS", "MANAGE_CATEGORIES", "MANAGE_BADGES"],
+      isDefault: true,
+    },
+    {
+      name: "MODERATOR",
+      displayName: "Modérateur",
+      color: "#3B82F6",
+      permissions: ["MANAGE_POSTS", "MANAGE_COMMENTS", "DELETE_COMMENTS"],
+      isDefault: true,
+    },
+    {
+      name: "MEMBER",
+      displayName: "Membre",
+      color: "#10B981",
+      permissions: ["CREATE_POSTS", "CREATE_COMMENTS"],
+      isDefault: true,
+    },
+  ];
+
+  await prisma.role.createMany({
+    data: defaultRoles.map((role) => ({
+      shopId: shopId,
+      name: role.name,
+      displayName: role.displayName,
+      color: role.color,
+      permissions: role.permissions,
+      isDefault: role.isDefault,
+    })),
+    skipDuplicates: true, // Évite les erreurs si les rôles existent déjà
+  });
+}
+
 export async function getCurrentShopId(): Promise<string | null> {
   try {
     // Option 1: Depuis le cookie shopDomain (défini par middleware)
@@ -23,6 +62,9 @@ export async function getCurrentShopId(): Promise<string | null> {
           },
           select: { id: true },
         });
+
+        // ✅ Créer immédiatement les 3 rôles par défaut
+        await createDefaultRolesForShop(shop.id);
       }
 
       return shop?.id || null;
@@ -54,6 +96,9 @@ export async function getCurrentShopId(): Promise<string | null> {
           },
           select: { id: true },
         });
+
+        // ✅ Créer immédiatement les 3 rôles par défaut
+        await createDefaultRolesForShop(shop.id);
       }
 
       return shop?.id || null;
