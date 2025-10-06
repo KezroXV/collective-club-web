@@ -52,6 +52,26 @@ npm run seed
 
 ## Architecture Multi-Tenant
 
+### Navigation et URLs
+
+Pour accéder au forum d'un shop, l'application utilise le paramètre `shop` dans l'URL :
+
+**Format d'URL** : `https://votre-domaine.com/?shop=nom-du-shop.myshopify.com`
+
+**Pages disponibles** :
+- Page d'accueil/Forum : `/?shop=nom-du-shop.myshopify.com`
+- Communauté : `/community?shop=nom-du-shop.myshopify.com`
+- Dashboard admin : `/dashboard?shop=nom-du-shop.myshopify.com`
+
+**Mécanisme d'isolation** :
+Le `shopId` est extrait automatiquement de :
+1. Query params (`?shop=`)
+2. Headers HTTP
+3. Cookies (pour persister la session)
+
+⚠️ En développement : utilise par défaut `collective-club.myshopify.com` si aucun shop n'est fourni
+⚠️ En production : l'absence du paramètre `shop` bloque la requête
+
 ### Sécurité
 - **Isolation stricte** : Chaque boutique ne peut accéder qu'à ses propres données
 - **Validation des domaines** : Vérification stricte des formats Shopify

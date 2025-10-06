@@ -143,7 +143,9 @@ function HeaderContent() {
                 background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
               }}
             >
-              <span className="text-white font-bold text-lg sm:text-xl">C</span>
+              <span className="text-white font-bold text-lg sm:text-xl">
+                {getShopName().charAt(0).toUpperCase()}
+              </span>
             </div>
             <div className="flex flex-col">
               <span
