@@ -65,14 +65,14 @@ function StatCard({
   if (isLoading) {
     return (
       <Card className="hover:shadow-sm animate-pulse" style={{ borderColor }}>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-1">
-            <div className="h-4 w-16 bg-gray-200 rounded"></div>
-            <HelpCircle className="h-4 w-4 text-gray-400" />
+            <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-200 rounded"></div>
+            <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
           </div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-8 w-16 bg-gray-200 rounded"></div>
-            <div className="h-6 w-12 bg-gray-200 rounded"></div>
+          <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+            <div className="h-6 w-12 sm:h-8 sm:w-16 bg-gray-200 rounded"></div>
+            <div className="h-5 w-10 sm:h-6 sm:w-12 bg-gray-200 rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -86,30 +86,30 @@ function StatCard({
 
   return (
     <Card
-      className="hover:shadow-md transition-all pt-0 h-32 duration-300 hover:-translate-y-1"
+      className="hover:shadow-md transition-all pt-0 h-28 sm:h-32 duration-300 hover:-translate-y-1"
       style={{ borderColor }}
     >
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-lg text-black text-semibold">{title}</p>
-          <HelpCircle className="h-4 w-4 text-gray-400" />
+          <p className="text-sm sm:text-lg text-black text-semibold">{title}</p>
+          <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
         </div>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
           <Image
             src={iconSrc}
             alt={title}
-            width={13.75}
-            height={13.75}
-            className="text-blue-600"
+            width={12}
+            height={12}
+            className="text-blue-600 sm:w-[13.75px] sm:h-[13.75px]"
           />
           <span
-            className={`text-3xl font-bold ${valueColor} transition-all duration-300`}
+            className={`text-2xl sm:text-3xl font-bold ${valueColor} transition-all duration-300`}
           >
             {displayValue.toLocaleString()}
           </span>
           {variation > 0 && (
             <span
-              className={`text-xs px-2 py-1 rounded ${trendColor} transition-all duration-200`}
+              className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${trendColor} transition-all duration-200 whitespace-nowrap`}
             >
               {trendIcon} {variation}%
             </span>
@@ -171,8 +171,8 @@ export default function StatsCards({
   useEffect(() => {
     fetchStats();
 
-    // Rafraîchir les stats toutes les 5 minutes
-    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+    // Rafraîchir les stats toutes les 30 secondes pour une meilleure réactivité
+    const interval = setInterval(fetchStats, 30 * 1000);
 
     return () => clearInterval(interval);
   }, [shopId]);
@@ -193,7 +193,7 @@ export default function StatsCards({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <StatCard
         title="Posts"
         value={stats?.posts.total || 0}

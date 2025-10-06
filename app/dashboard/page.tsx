@@ -37,7 +37,7 @@ function DashboardPageContent() {
     hasAccess,
     currentUserRole: currentUser?.role,
     currentUserRoleInfo: currentUser?.roleInfo?.displayName,
-    loading
+    loading,
   });
 
   // Récupérer le shopId depuis URL ou cookies
@@ -106,7 +106,6 @@ function DashboardPageContent() {
     return null;
   }
 
-
   // Afficher un loader pendant la vérification
   if (loading) {
     return (
@@ -144,11 +143,14 @@ function DashboardPageContent() {
   }
 
   return (
-    <ThemeWrapper applyBackgroundColor={true} className="min-h-screen p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <ThemeWrapper
+      applyBackgroundColor={true}
+      className="min-h-screen p-3 sm:p-6 lg:p-8"
+    >
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
         <DashboardHeader shopId={shopId} borderColor={colors.Bordures} />
 
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           <ManagementSection
             onClientsClick={handleClientsClick}
             onPostsClick={handlePostsClick}
@@ -190,11 +192,13 @@ function DashboardPageContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        </div>
+      }
+    >
       <DashboardPageContent />
     </Suspense>
   );

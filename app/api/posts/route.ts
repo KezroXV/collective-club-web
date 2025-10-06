@@ -16,49 +16,49 @@ export async function GET(request: NextRequest) {
     ensureShopIsolation(shopId);
 
     const { searchParams } = new URL(request.url);
-    const pinnedOnly = searchParams.get('pinnedOnly'); // Pour filtre "pinned"
-    const sortBy = searchParams.get('sortBy') || 'newest';
-    const categoryId = searchParams.get('categoryId');
-    const search = searchParams.get('search');
-    const userId = searchParams.get('userId'); // Pour récupérer les réactions utilisateur
+    const pinnedOnly = searchParams.get("pinnedOnly"); // Pour filtre "pinned"
+    const sortBy = searchParams.get("sortBy") || "newest";
+    const categoryId = searchParams.get("categoryId");
+    const search = searchParams.get("search");
+    const userId = searchParams.get("userId"); // Pour récupérer les réactions utilisateur
 
     // Construction de la clause where
     const whereClause: any = { shopId };
 
-    if (pinnedOnly === 'true') {
+    if (pinnedOnly === "true") {
       whereClause.isPinned = true;
     }
 
-    if (categoryId && categoryId !== 'all') {
+    if (categoryId && categoryId !== "all") {
       whereClause.categoryId = categoryId;
     }
 
     if (search) {
       whereClause.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search, mode: "insensitive" } },
+        { content: { contains: search, mode: "insensitive" } },
       ];
     }
 
     // Construction de la clause orderBy
     const orderBy: any[] = [];
-    
+
     // Toujours mettre les épinglés en premier (sauf si on filtre uniquement les épinglés)
-    if (pinnedOnly !== 'true') {
-      orderBy.push({ isPinned: 'desc' });
+    if (pinnedOnly !== "true") {
+      orderBy.push({ isPinned: "desc" });
     }
-    
+
     // Ajouter le tri secondaire
     switch (sortBy) {
-      case 'oldest':
-        orderBy.push({ createdAt: 'asc' });
+      case "oldest":
+        orderBy.push({ createdAt: "asc" });
         break;
-      case 'popular':
-        orderBy.push({ reactions: { _count: 'desc' } });
+      case "popular":
+        orderBy.push({ reactions: { _count: "desc" } });
         break;
-      case 'newest':
+      case "newest":
       default:
-        orderBy.push({ createdAt: 'desc' });
+        orderBy.push({ createdAt: "desc" });
         break;
     }
 
@@ -114,10 +114,12 @@ export async function GET(request: NextRequest) {
           return acc;
         }, {} as Record<string, number>);
 
-        const reactionsData = Object.entries(reactionsMap).map(([type, count]) => ({
-          type,
-          count,
-        }));
+        const reactionsData = Object.entries(reactionsMap).map(
+          ([type, count]) => ({
+            type,
+            count,
+          })
+        );
 
         // Récupérer la réaction de l'utilisateur actuel si connecté
         let userReaction = null;
@@ -142,12 +144,12 @@ export async function GET(request: NextRequest) {
 
     // Compter les posts épinglés pour le badge
     const pinnedCount = await prisma.post.count({
-      where: { shopId, isPinned: true }
+      where: { shopId, isPinned: true },
     });
 
     return NextResponse.json({
       posts: processedPosts,
-      pinnedCount
+      pinnedCount,
     });
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -163,15 +165,27 @@ export async function POST(request: NextRequest) {
   try {
     // 🔐 AUTHENTICATION: Vérifier que l'utilisateur est connecté
     const { user, shopId } = await getAuthContext();
-    
-    console.log("📝 Creating post:", { userId: user.id, role: user.role, shopId });
+
+    console.log("📝 Creating post:", {
+      userId: user.id,
+      role: user.role,
+      shopId,
+    });
 
     const body = await request.json();
     const { title, content, imageUrl, category, poll } = body;
 
+    // Validation des champs obligatoires
     if (!title || !content) {
       return NextResponse.json(
         { error: "Title and content are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!category) {
+      return NextResponse.json(
+        { error: "Category is required" },
         { status: 400 }
       );
     }
@@ -181,20 +195,23 @@ export async function POST(request: NextRequest) {
     const authorId = user.id;
 
     // Convertir category (nom) en categoryId avec isolation par boutique
-    let categoryId = null;
-    if (category) {
-      const foundCategory = await prisma.category.findUnique({
-        where: { 
-          shopId_name: {
-            shopId,
-            name: category,
-          }
+    const foundCategory = await prisma.category.findUnique({
+      where: {
+        shopId_name: {
+          shopId,
+          name: category,
         },
-      });
-      if (foundCategory) {
-        categoryId = foundCategory.id;
-      }
+      },
+    });
+
+    if (!foundCategory) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 400 }
+      );
     }
+
+    const categoryId = foundCategory.id;
 
     // ✅ CRÉER LE POST AVEC SONDAGE
     const post = await prisma.post.create({

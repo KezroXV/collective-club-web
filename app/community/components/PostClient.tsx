@@ -461,23 +461,26 @@ const PostClient = () => {
   return (
     <ThemeWrapper applyBackgroundColor={true} className="min-h-screen">
       <Header />
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumbs SEO */}
           <PostBreadcrumbs post={post} />
 
           {/* Bouton retour */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <Link href="/community">
-              <Button variant="outline" className="gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Retour au forum
+              <Button
+                variant="outline"
+                className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-sm"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>Retour</span>
               </Button>
             </Link>
           </div>
 
           {/* Layout 2 colonnes */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
             {/* Colonne principale (66%) */}
             <div className="lg:col-span-2">
               <Card

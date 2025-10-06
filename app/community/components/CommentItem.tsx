@@ -33,7 +33,7 @@ interface Comment {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
+    image?: string;
   };
   createdAt: string;
   reactions?: ReactionData[];
@@ -170,7 +170,7 @@ const CommentItem = ({
       if (response.ok) {
         setReplyContent("");
         setShowReplyForm(false);
-        onCommentAdded();
+        onCommentAdded(); // Rafraîchissement immédiat
         toast.success("Réponse ajoutée !");
       } else {
         toast.error("Erreur lors de l'ajout de la réponse");
@@ -199,7 +199,7 @@ const CommentItem = ({
 
       if (response.ok) {
         setShowDeleteDialog(false);
-        onCommentDeleted(comment.id); // Supprimer le commentaire de l'état local
+        onCommentDeleted(comment.id); // Rafraîchissement immédiat via suppression de l'état local
         toast.success("Commentaire supprimé !");
       } else {
         const errorData = await response.json();
@@ -223,7 +223,7 @@ const CommentItem = ({
     >
       <div className="flex gap-4">
         <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={comment.author.avatar} />
+          <AvatarImage src={comment.author.image || undefined} />
           <AvatarFallback
             className="text-sm text-white"
             style={{ backgroundColor: colors.Posts }}

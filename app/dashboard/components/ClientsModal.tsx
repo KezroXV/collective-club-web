@@ -150,10 +150,13 @@ export default function ClientsModal({
       params.append("limit", ITEMS_PER_PAGE.toString());
       if (search.trim()) params.append("search", search.trim());
 
-      const response = await fetch(`/api/members?${params.toString()}&shop=${shopDomain}`, {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `/api/members?${params.toString()}&shop=${shopDomain}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -253,15 +256,18 @@ export default function ClientsModal({
     try {
       setDeletingUserId(memberId);
 
-      const response = await fetch(`/api/users/${memberId}?shop=${shopDomain}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          userId,
-          userRole,
-        }),
-      });
+      const response = await fetch(
+        `/api/users/${memberId}?shop=${shopDomain}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            userId,
+            userRole,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -285,14 +291,17 @@ export default function ClientsModal({
     try {
       setRoleChangeUserId(memberId);
 
-      const response = await fetch(`/api/users/${memberId}/role-assignment?userId=${userId}&shop=${shopDomain}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          roleName: newRoleName,
-        }),
-      });
+      const response = await fetch(
+        `/api/users/${memberId}/role-assignment?userId=${userId}&shop=${shopDomain}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            roleName: newRoleName,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -306,17 +315,21 @@ export default function ClientsModal({
       // Mettre à jour le membre dans la liste locale
       setMembers((prev) =>
         prev.map((member) =>
-          member.id === memberId ? {
-            ...member,
-            role: newRoleName,
-            roleInfo: result.roleInfo ? {
-              id: result.roleInfo.id,
-              name: result.roleInfo.name,
-              displayName: result.roleInfo.displayName,
-              color: result.roleInfo.color,
-              isDefault: result.roleInfo.isDefault
-            } : undefined
-          } : member
+          member.id === memberId
+            ? {
+                ...member,
+                role: newRoleName,
+                roleInfo: result.roleInfo
+                  ? {
+                      id: result.roleInfo.id,
+                      name: result.roleInfo.name,
+                      displayName: result.roleInfo.displayName,
+                      color: result.roleInfo.color,
+                      isDefault: result.roleInfo.isDefault,
+                    }
+                  : undefined,
+              }
+            : member
         )
       );
     } catch (error) {
@@ -325,7 +338,6 @@ export default function ClientsModal({
       setRoleChangeUserId(null);
     }
   };
-
 
   useEffect(() => {
     if (isOpen && shopDomain) {
@@ -338,37 +350,37 @@ export default function ClientsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         size="full"
-        className="sm:max-w-6xl w-[95vw] max-h-[80vh] overflow-hidden"
+        className="sm:max-w-6xl w-[95vw] max-h-[85vh] sm:max-h-[80vh] overflow-hidden p-4 sm:p-6"
       >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-            <Users className="h-5 w-5" />
+        <DialogHeader className="pb-3 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+            <Users className="h-4 w-4 sm:h-5 sm:w-5" />
             Gestion des Membres
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Consultez et gérez les membres de votre communauté
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Barre de recherche */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <Input
               type="text"
-              placeholder="Rechercher par nom ou email..."
+              placeholder="Rechercher..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
             />
           </div>
 
           {/* Stats rapides */}
           {!isLoading && (
-            <div className="flex gap-4 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+            <div className="flex gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 bg-gray-50 p-2 sm:p-3 rounded-lg flex-wrap">
               <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                <span>Total: {totalMembers} membres</span>
+                <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Total: {totalMembers}</span>
               </div>
               <div className="flex items-center gap-1">
                 <span>•</span>
@@ -380,7 +392,7 @@ export default function ClientsModal({
           )}
 
           {/* Liste des membres */}
-          <div className="overflow-y-auto max-h-96 space-y-3">
+          <div className="overflow-y-auto max-h-[50vh] sm:max-h-96 space-y-2 sm:space-y-3">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -400,23 +412,25 @@ export default function ClientsModal({
                   key={member.id}
                   className="hover:shadow-md transition-all duration-200"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                      <div className="flex-1 min-w-0 w-full">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-gray-900 truncate">
+                            <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                               {member.name}
                             </h4>
-                            <p className="text-sm text-gray-600 truncate">
+                            <p className="text-xs sm:text-sm text-gray-600 truncate">
                               {member.email}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                             {member.roleInfo && !member.roleInfo.isDefault ? (
                               <Badge
                                 className="text-xs text-white border-gray-200"
-                                style={{ backgroundColor: member.roleInfo.color }}
+                                style={{
+                                  backgroundColor: member.roleInfo.color,
+                                }}
                               >
                                 {member.roleInfo.displayName}
                               </Badge>
@@ -477,114 +491,117 @@ export default function ClientsModal({
                       </div>
 
                       {/* Actions de modération */}
-                      {canBanUsers() &&
-                        member.role !== "ADMIN" && (
-                          <div className="flex items-center gap-2 ml-4">
-                            {/* Menu Actions */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  disabled={
-                                    roleChangeUserId === member.id ||
-                                    deletingUserId === member.id ||
-                                    banningUserId === member.id
-                                  }
-                                  className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
-                                  title="Actions"
-                                >
-                                  {roleChangeUserId === member.id ||
+                      {canBanUsers() && member.role !== "ADMIN" && (
+                        <div className="flex items-center gap-2 ml-4">
+                          {/* Menu Actions */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={
+                                  roleChangeUserId === member.id ||
                                   deletingUserId === member.id ||
-                                  banningUserId === member.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Settings className="h-4 w-4" />
-                                      <ChevronDown className="h-3 w-3 ml-1" />
-                                    </>
-                                  )}
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56">
-                                {/* Bannir/Débannir - ADMIN et MODERATOR */}
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    setBanConfirm({
-                                      id: member.id,
-                                      name: member.name,
-                                      isBanned: member.isBanned || false,
-                                    })
-                                  }
-                                  disabled={banningUserId === member.id}
-                                  className={`flex items-center gap-2 ${
-                                    member.isBanned
-                                      ? "text-green-600 focus:text-green-600 focus:bg-green-50"
-                                      : "text-red-600 focus:text-red-600 focus:bg-red-50"
-                                  }`}
-                                >
-                                  {banningUserId === member.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                  ) : member.isBanned ? (
-                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                  ) : (
-                                    <Ban className="h-4 w-4 mr-2" />
-                                  )}
-                                  {member.isBanned ? "Débannir" : "Bannir"}{" "}
-                                  l&apos;utilisateur
-                                </DropdownMenuItem>
-
-                                {/* Actions réservées aux utilisateurs avec permissions */}
-                                {canChangeRoles() && (
+                                  banningUserId === member.id
+                                }
+                                className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                                title="Actions"
+                              >
+                                {roleChangeUserId === member.id ||
+                                deletingUserId === member.id ||
+                                banningUserId === member.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
                                   <>
-                                    <DropdownMenuSeparator />
-
-                                    {/* Changer le rôle */}
-                                    <DropdownMenuItem
-                                      disabled
-                                      className="text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                      Changer le rôle
-                                    </DropdownMenuItem>
-
-                                    {/* Tous les rôles disponibles */}
-                                    {availableRoles
-                                      .filter((role) => role.name !== member.role)
-                                      .map((role) => (
-                                        <DropdownMenuItem
-                                          key={role.id}
-                                          onClick={() => handleChangeRole(member.id, role.name)}
-                                          className="flex items-center gap-2"
-                                        >
-                                          <span
-                                            className="w-2 h-2 rounded-full"
-                                            style={{ backgroundColor: role.color }}
-                                          />
-                                          {role.displayName}
-                                        </DropdownMenuItem>
-                                      ))}
-
-                                    <DropdownMenuSeparator />
-
-                                    {/* Supprimer */}
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        setDeleteConfirm({
-                                          id: member.id,
-                                          name: member.name,
-                                        })
-                                      }
-                                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                                    >
-                                      <Trash2 className="h-4 w-4 mr-2" />
-                                      Supprimer définitivement
-                                    </DropdownMenuItem>
+                                    <Settings className="h-4 w-4" />
+                                    <ChevronDown className="h-3 w-3 ml-1" />
                                   </>
                                 )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        )}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              {/* Bannir/Débannir - ADMIN et MODERATOR */}
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  setBanConfirm({
+                                    id: member.id,
+                                    name: member.name,
+                                    isBanned: member.isBanned || false,
+                                  })
+                                }
+                                disabled={banningUserId === member.id}
+                                className={`flex items-center gap-2 ${
+                                  member.isBanned
+                                    ? "text-green-600 focus:text-green-600 focus:bg-green-50"
+                                    : "text-red-600 focus:text-red-600 focus:bg-red-50"
+                                }`}
+                              >
+                                {banningUserId === member.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                ) : member.isBanned ? (
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                ) : (
+                                  <Ban className="h-4 w-4 mr-2" />
+                                )}
+                                {member.isBanned ? "Débannir" : "Bannir"}{" "}
+                                l&apos;utilisateur
+                              </DropdownMenuItem>
+
+                              {/* Actions réservées aux utilisateurs avec permissions */}
+                              {canChangeRoles() && (
+                                <>
+                                  <DropdownMenuSeparator />
+
+                                  {/* Changer le rôle */}
+                                  <DropdownMenuItem
+                                    disabled
+                                    className="text-xs font-medium text-gray-500 uppercase"
+                                  >
+                                    Changer le rôle
+                                  </DropdownMenuItem>
+
+                                  {/* Tous les rôles disponibles */}
+                                  {availableRoles
+                                    .filter((role) => role.name !== member.role)
+                                    .map((role) => (
+                                      <DropdownMenuItem
+                                        key={role.id}
+                                        onClick={() =>
+                                          handleChangeRole(member.id, role.name)
+                                        }
+                                        className="flex items-center gap-2"
+                                      >
+                                        <span
+                                          className="w-2 h-2 rounded-full"
+                                          style={{
+                                            backgroundColor: role.color,
+                                          }}
+                                        />
+                                        {role.displayName}
+                                      </DropdownMenuItem>
+                                    ))}
+
+                                  <DropdownMenuSeparator />
+
+                                  {/* Supprimer */}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      setDeleteConfirm({
+                                        id: member.id,
+                                        name: member.name,
+                                      })
+                                    }
+                                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Supprimer définitivement
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

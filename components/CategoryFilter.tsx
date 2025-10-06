@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAutoRefresh } from "@/lib/hooks/useAutoRefresh";
 import {
   Filter,
   Search,
@@ -84,20 +85,33 @@ export default function CategoryFilter({
   const MAX_VISIBLE = 3; // Réduire pour tester le "Voir plus"
 
   // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories");
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
-      }
+    fetchCategories();
+  }, []);
+
+  // Auto-refresh toutes les 10 secondes
+  useAutoRefresh(fetchCategories, { enabled: true, interval: 10000 });
+
+  // Écouter l'événement de création de catégorie pour rafraîchir immédiatement
+  useEffect(() => {
+    const handleCategoryCreated = () => {
+      fetchCategories();
     };
 
-    fetchCategories();
+    window.addEventListener('categoryCreated', handleCategoryCreated);
+    return () => window.removeEventListener('categoryCreated', handleCategoryCreated);
   }, []);
 
   // Ajouter "Tout" en premier

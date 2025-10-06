@@ -24,15 +24,17 @@ export default function ManagementSection({
   borderColor = "#E5E7EB",
 }: ManagementSectionProps) {
   return (
-    <div className="col-span-8 space-y-6">
+    <div className="lg:col-span-8 space-y-4 sm:space-y-6">
       <Card className="hover:shadow-sm" style={{ borderColor }}>
-        <CardContent className="">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Gérer</h3>
-          <nav className="space-y-1">
+        <CardContent className="p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+            Gérer
+          </h3>
+          <nav className="space-y-2 sm:space-y-1">
             <Button
               variant="ghost"
               onClick={onClientsClick}
-              className="w-full text-md justify-start h-16 py-5 text-gray-600 bg-chart-6 mb-4 border"
+              className="w-full text-sm sm:text-md justify-start h-12 sm:h-16 py-3 sm:py-5 text-gray-600 bg-chart-6 mb-2 sm:mb-4 border"
               style={{ borderColor }}
               icon={<Users className="h-4 w-4" />}
             >
@@ -41,25 +43,17 @@ export default function ManagementSection({
             <Button
               variant="ghost"
               onClick={onPostsClick}
-              className="w-full text-md justify-start h-16 py-5 text-gray-600 bg-chart-6 mb-4 border"
+              className="w-full text-sm sm:text-md justify-start h-12 sm:h-16 py-3 sm:py-5 text-gray-600 bg-chart-6 mb-2 sm:mb-4 border"
               style={{ borderColor }}
               icon={<FileText className="h-4 w-4" />}
             >
               Posts
             </Button>
-            <Button
-              variant="ghost"
-              onClick={onCategoriesClick}
-              className="w-full text-md justify-start h-16 py-5 text-gray-600 bg-chart-6 mb-4 border"
-              style={{ borderColor }}
-              icon={<FolderOpen className="h-4 w-4" />}
-            >
-              Catégories
-            </Button>
+
             <Button
               variant="ghost"
               onClick={onThemeClick}
-              className="w-full text-md justify-start h-16 py-5 text-gray-600 bg-chart-6 border"
+              className="w-full text-sm sm:text-md justify-start h-12 sm:h-16 py-3 sm:py-5 text-gray-600 bg-chart-6 border"
               style={{ borderColor }}
               icon={<Palette className="h-4 w-4" />}
             >

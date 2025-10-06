@@ -442,39 +442,41 @@ export default function ShopManagementSection({
   }, [categorySearchQuery]);
 
   return (
-    <div className="col-span-4">
+    <div className="lg:col-span-4">
       <Card className="hover:shadow-sm" style={{ borderColor }}>
-        <CardContent className="">
+        <CardContent className="p-4 sm:p-6">
           {/* Section Rôles */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Rôles</h3>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              Rôles
+            </h3>
+            <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                 <Input
                   placeholder="Rechercher..."
                   value={userSearchQuery}
                   onChange={(e) => setUserSearchQuery(e.target.value)}
-                  className="pl-10 w-32 h-8 text-sm"
+                  className="pl-8 sm:pl-10 w-full sm:w-32 h-8 text-xs sm:text-sm"
                 />
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 onClick={handleUserPrevPage}
                 disabled={userCurrentPage === 0}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 onClick={handleUserNextPage}
                 disabled={userCurrentPage >= totalUserPages - 1}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
@@ -510,30 +512,32 @@ export default function ShopManagementSection({
                   key={user.id}
                   className="flex items-center justify-between"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     {user.image ? (
                       <Image
                         src={user.image}
                         alt={user.name}
                         width={32}
                         height={32}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-sm font-medium">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xs sm:text-sm font-medium flex-shrink-0">
                         {getInitials(user.name)}
                       </div>
                     )}
-                    <div>
-                      <p className="text-[13px] font-medium text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-[13px] font-medium text-gray-900 truncate">
                         {user.name}
                       </p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${getRoleColor(
+                      className={`px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs rounded-full whitespace-nowrap ${getRoleColor(
                         user.role,
                         user.isOwner
                       )}`}
@@ -590,66 +594,45 @@ export default function ShopManagementSection({
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <hr className="border-[1px] mb-6" style={{ borderColor }} />
-
-          {/* Section Rôles Personnalisés */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Rôles Personnalisés
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCustomRolesModal(true)}
-                className="text-gray-600 hover:text-gray-700"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Gérer les rôles
-              </Button>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">
-              Créez des rôles personnalisés avec des permissions spécifiques
-              comme Discord
-            </p>
-          </div>
-          <hr className="border-[1px] mb-6" style={{ borderColor }} />
+          <hr className="border-[1px] mb-4 sm:mb-6" style={{ borderColor }} />
 
           {/* Section Catégories */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Catégories</h3>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              Catégories
+            </h3>
+            <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
                 <Input
                   placeholder="Rechercher..."
                   value={categorySearchQuery}
                   onChange={(e) => setCategorySearchQuery(e.target.value)}
-                  className="pl-10 w-32 h-8 text-sm"
+                  className="pl-8 sm:pl-10 w-full sm:w-32 h-8 text-xs sm:text-sm"
                 />
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 onClick={handleCategoryPrevPage}
                 disabled={categoryCurrentPage === 0}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 onClick={handleCategoryNextPage}
                 disabled={categoryCurrentPage >= totalCategoryPages - 1}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 mb-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-3">
             {loadingCategories ? (
               <>
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -735,17 +718,17 @@ export default function ShopManagementSection({
               <Plus className="h-4 w-4" />
             </Button>
           </div>
-          <hr className="border-[1px] mb-6" style={{ borderColor }} />
+          <hr className="border-[1px] mb-4 sm:mb-6" style={{ borderColor }} />
 
           {/* Section Personnalisation */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
             Personnalisation du forum
           </h3>
 
           <Button
             variant="ghost"
             onClick={onThemeClick}
-            className="w-full justify-start h-16 border border-dashed text-gray-600 hover:bg-gray-50"
+            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm"
             style={{ borderColor }}
           >
             <Edit className="h-4 w-4 mr-2" />
@@ -759,33 +742,36 @@ export default function ShopManagementSection({
         open={showAddCategoryModal}
         onOpenChange={setShowAddCategoryModal}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[95vw] max-w-md mx-2 sm:mx-4">
           <DialogHeader>
             <DialogTitle>Ajouter une catégorie</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2 block">
                 Nom de la catégorie
               </label>
               <Input
                 placeholder="Ex: Mode, Tech, Lifestyle..."
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
+                className="h-9 sm:h-10 text-sm"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2 block">
                 Couleur
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
                     key={color.value}
                     onClick={() => setSelectedColor(color.value)}
-                    className={`w-12 h-8 rounded-md relative ${color.value} ${
+                    className={`w-10 h-7 sm:w-12 sm:h-8 rounded-md relative ${
+                      color.value
+                    } ${
                       selectedColor === color.value
                         ? "ring-2 ring-gray-900 ring-offset-2"
                         : ""
@@ -793,7 +779,7 @@ export default function ShopManagementSection({
                   >
                     {selectedColor === color.value && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                       </div>
                     )}
                   </button>
@@ -801,7 +787,7 @@ export default function ShopManagementSection({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2 pt-2 sm:pt-4">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -810,12 +796,14 @@ export default function ShopManagementSection({
                   setSelectedColor("bg-blue-500");
                 }}
                 disabled={loadingAddCategory}
+                className="h-9 text-sm"
               >
                 Annuler
               </Button>
               <Button
                 onClick={handleAddCategory}
                 disabled={!newCategoryName.trim() || loadingAddCategory}
+                className="h-9 text-sm"
               >
                 {loadingAddCategory ? "Création..." : "Créer"}
               </Button>
@@ -829,14 +817,14 @@ export default function ShopManagementSection({
         open={showEditCategoryModal}
         onOpenChange={setShowEditCategoryModal}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[95vw] max-w-md mx-2 sm:mx-4">
           <DialogHeader>
             <DialogTitle>Modifier la catégorie</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2 block">
                 Nom de la catégorie
               </label>
               <Input
@@ -844,19 +832,22 @@ export default function ShopManagementSection({
                 value={editCategoryName}
                 onChange={(e) => setEditCategoryName(e.target.value)}
                 autoFocus
+                className="h-9 sm:h-10 text-sm"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">
+              <label className="text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2 block">
                 Couleur
               </label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                 {COLOR_OPTIONS.map((color) => (
                   <button
                     key={color.value}
                     onClick={() => setEditCategoryColor(color.value)}
-                    className={`w-12 h-8 rounded-md relative ${color.value} ${
+                    className={`w-10 h-7 sm:w-12 sm:h-8 rounded-md relative ${
+                      color.value
+                    } ${
                       editCategoryColor === color.value
                         ? "ring-2 ring-gray-900 ring-offset-2"
                         : ""
@@ -864,7 +855,7 @@ export default function ShopManagementSection({
                   >
                     {editCategoryColor === color.value && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                       </div>
                     )}
                   </button>
@@ -872,7 +863,7 @@ export default function ShopManagementSection({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2 pt-2 sm:pt-4">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -882,12 +873,14 @@ export default function ShopManagementSection({
                   setEditCategoryColor("bg-blue-500");
                 }}
                 disabled={loadingEditCategory}
+                className="h-9 text-sm"
               >
                 Annuler
               </Button>
               <Button
                 onClick={handleEditCategory}
                 disabled={!editCategoryName.trim() || loadingEditCategory}
+                className="h-9 text-sm"
               >
                 {loadingEditCategory ? "Modification..." : "Modifier"}
               </Button>
@@ -901,24 +894,26 @@ export default function ShopManagementSection({
         open={showDeleteCategoryModal}
         onOpenChange={setShowDeleteCategoryModal}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-[95vw] max-w-md mx-2 sm:mx-4">
           <DialogHeader>
             <DialogTitle>Supprimer la catégorie</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg border border-red-200">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="flex-shrink-0">
-                <Trash2 className="h-5 w-5 text-red-600" />
+                <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 text-red-600 mt-0.5" />
               </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-red-800">Attention</h3>
-                <p className="text-sm text-red-700 mt-1">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xs sm:text-sm font-medium text-red-800">
+                  Attention
+                </h3>
+                <p className="text-xs sm:text-sm text-red-700 mt-1">
                   Êtes-vous sûr de vouloir supprimer la catégorie "
                   {deletingCategory?.name}" ? Cette action est irréversible.
                 </p>
                 {deletingCategory && deletingCategory._count.posts > 0 && (
-                  <p className="text-xs text-red-600 mt-2 font-medium">
+                  <p className="text-[10px] sm:text-xs text-red-600 mt-1.5 sm:mt-2 font-medium">
                     ⚠️ Cette catégorie contient {deletingCategory._count.posts}{" "}
                     post(s)
                   </p>
@@ -926,7 +921,7 @@ export default function ShopManagementSection({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-1 sm:pt-2">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -934,6 +929,7 @@ export default function ShopManagementSection({
                   setDeletingCategory(null);
                 }}
                 disabled={loadingDeleteCategory}
+                className="h-9 text-sm"
               >
                 Annuler
               </Button>
@@ -941,6 +937,7 @@ export default function ShopManagementSection({
                 variant="destructive"
                 onClick={handleDeleteCategory}
                 disabled={loadingDeleteCategory}
+                className="h-9 text-sm"
               >
                 {loadingDeleteCategory ? "Suppression..." : "Supprimer"}
               </Button>

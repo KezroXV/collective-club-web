@@ -184,6 +184,9 @@ export default function PostsModal({
 
       setPosts((prev) => prev.map(updatePost));
       setFilteredPosts((prev) => prev.map(updatePost));
+
+      // Déclencher un événement pour rafraîchir les posts partout
+      window.dispatchEvent(new CustomEvent("postPinToggled"));
     } catch (error) {
       console.error("Error toggling pin:", error);
     } finally {
@@ -259,28 +262,28 @@ export default function PostsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         size="full"
-        className="sm:max-w-6xl w-[95vw] max-h-[80vh] overflow-hidden"
+        className="sm:max-w-6xl w-[95vw] max-h-[85vh] sm:max-h-[80vh] overflow-hidden p-4 sm:p-6"
       >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+        <DialogHeader className="pb-3 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-xl font-semibold">
             Gestion des Posts
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Gérez tous les posts de votre communauté
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Barre de recherche et bouton d'ajout de catégorie */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <Input
                 type="text"
-                placeholder="Rechercher par titre, contenu ou auteur..."
+                placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10"
+                className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
               />
             </div>
 
@@ -289,24 +292,25 @@ export default function PostsModal({
               <Button
                 variant="outline"
                 onClick={() => setShowCategoryModal(true)}
-                className="shrink-0 flex items-center gap-2"
+                className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 text-xs sm:text-sm px-3"
               >
-                <Plus className="h-4 w-4" />
-                Nouvelle catégorie
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Nouvelle catégorie</span>
+                <span className="xs:hidden">Catégorie</span>
               </Button>
             )}
           </div>
 
           {/* Stats rapides */}
           {!isLoading && (
-            <div className="flex gap-4 text-sm text-gray-600">
-              <span>Total: {posts.length} posts</span>
-              <span>Affichés: {filteredPosts.length} posts</span>
+            <div className="flex gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 flex-wrap">
+              <span>Total: {posts.length}</span>
+              <span>Affichés: {filteredPosts.length}</span>
             </div>
           )}
 
           {/* Liste des posts */}
-          <div className="overflow-y-auto max-h-96 space-y-3">
+          <div className="overflow-y-auto max-h-[50vh] sm:max-h-96 space-y-2 sm:space-y-3">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -326,17 +330,17 @@ export default function PostsModal({
                   key={post.id}
                   className="hover:shadow-md transition-all duration-200"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start mb-0 justify-between">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start mb-0 justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between ">
-                          <h4 className="font-semibold mb-2 text-gray-900 truncate">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="font-semibold mb-1.5 sm:mb-2 text-sm sm:text-base text-gray-900 line-clamp-2 sm:truncate flex-1">
                             {post.title}
                           </h4>
                           {post.category && (
                             <Badge
                               variant="secondary"
-                              className="ml-2 my-auto  shrink-0"
+                              className="shrink-0 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5"
                               style={{
                                 backgroundColor: `${post.category.color}20`,
                                 color: post.category.color,
@@ -347,36 +351,46 @@ export default function PostsModal({
                           )}
                         </div>
 
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-1.5 sm:mb-2 line-clamp-2">
                           {truncateContent(post.content)}
                         </p>
 
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>Par {post.author.name}</span>
-                          <span>{formatDate(post.createdAt)}</span>
+                        <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-gray-500 flex-wrap mb-1.5 sm:mb-2">
+                          <span className="truncate">
+                            Par {post.author.name}
+                          </span>
+                          <span className="hidden xs:inline">
+                            {formatDate(post.createdAt)}
+                          </span>
                         </div>
 
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <Heart className="h-4 w-4" />
-                              {post._count.reactions}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 sm:gap-4">
+                            <div className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm text-gray-600">
+                              <Heart className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="text-[10px] sm:text-sm">
+                                {post._count.reactions}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <MessageSquare className="h-4 w-4" />
-                              {post._count.comments}
+                            <div className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm text-gray-600">
+                              <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+                              <span className="text-[10px] sm:text-sm">
+                                {post._count.comments}
+                              </span>
                             </div>
                             {post._count.views !== undefined && (
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
-                                <Eye className="h-4 w-4" />
-                                {post._count.views}
+                              <div className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm text-gray-600">
+                                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="text-[10px] sm:text-sm">
+                                  {post._count.views}
+                                </span>
                               </div>
                             )}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 ml-4">
+                      <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 ml-2 sm:ml-4">
                         {/* Bouton Pin/Unpin pour non-MEMBER */}
                         {userRole && userRole !== "MEMBER" && (
                           <Button
@@ -386,7 +400,7 @@ export default function PostsModal({
                               handleTogglePin(post.id, post.isPinned || false)
                             }
                             disabled={pinningPostId === post.id}
-                            className={`${
+                            className={`h-7 w-7 sm:h-8 sm:w-8 p-0 ${
                               post.isPinned
                                 ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                 : "text-gray-600 hover:text-gray-700 hover:bg-gray-50"
@@ -394,11 +408,11 @@ export default function PostsModal({
                             title={post.isPinned ? "Désépingler" : "Épingler"}
                           >
                             {pinningPostId === post.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                             ) : post.isPinned ? (
-                              <PinOff className="h-4 w-4" />
+                              <PinOff className="h-3 w-3 sm:h-4 sm:w-4" />
                             ) : (
-                              <Pin className="h-4 w-4" />
+                              <Pin className="h-3 w-3 sm:h-4 sm:w-4" />
                             )}
                           </Button>
                         )}
@@ -409,9 +423,9 @@ export default function PostsModal({
                           onClick={() =>
                             setDeleteConfirm({ id: post.id, title: post.title })
                           }
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 sm:h-8 sm:w-8 p-0"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </div>
@@ -425,7 +439,7 @@ export default function PostsModal({
         {/* Modal de confirmation de suppression */}
         {deleteConfirm && (
           <Dialog open={true} onOpenChange={() => setDeleteConfirm(null)}>
-            <DialogContent>
+            <DialogContent className="w-[90vw] max-w-md mx-2">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-red-600">
                   <AlertTriangle className="h-5 w-5" />

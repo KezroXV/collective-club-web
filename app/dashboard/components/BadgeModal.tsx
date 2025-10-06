@@ -16,6 +16,7 @@ interface BadgeModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId?: string;
+  shopId?: string;
   onBadgeCreated?: () => void;
 }
 
@@ -23,6 +24,7 @@ export default function BadgeModal({
   isOpen,
   onClose,
   userId,
+  shopId,
   onBadgeCreated,
 }: BadgeModalProps) {
   const [newBadgeName, setNewBadgeName] = useState("");
@@ -69,6 +71,7 @@ export default function BadgeModal({
         },
         body: JSON.stringify({
           userId,
+          shopId,
           name: newBadgeName,
           imageUrl: newBadgeImage,
           requiredPoints: badgeCount,
@@ -82,7 +85,7 @@ export default function BadgeModal({
       } else {
         const errorData = await response.json();
         const errorMessage = errorData.error || "Erreur lors de la création";
-        
+
         if (response.status === 409) {
           // Erreur de conflit (nom de badge déjà existant)
           toast.error(`❌ ${errorMessage}`);

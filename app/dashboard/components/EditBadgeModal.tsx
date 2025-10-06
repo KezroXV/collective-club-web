@@ -25,6 +25,7 @@ interface EditBadgeModalProps {
   onClose: () => void;
   badge: Badge | null;
   userId?: string;
+  shopId?: string;
   onBadgeUpdated?: () => void;
 }
 
@@ -33,6 +34,7 @@ export default function EditBadgeModal({
   onClose,
   badge,
   userId,
+  shopId,
   onBadgeUpdated,
 }: EditBadgeModalProps) {
   const [badgeName, setBadgeName] = useState("");
@@ -88,6 +90,7 @@ export default function EditBadgeModal({
         },
         body: JSON.stringify({
           userId,
+          shopId,
           name: badgeName,
           imageUrl: badgeImage,
           requiredPoints: badgeCount,
@@ -100,8 +103,9 @@ export default function EditBadgeModal({
         handleClose();
       } else {
         const errorData = await response.json();
-        const errorMessage = errorData.error || "Erreur lors de la modification";
-        
+        const errorMessage =
+          errorData.error || "Erreur lors de la modification";
+
         if (response.status === 409) {
           // Erreur de conflit (nom de badge déjà existant)
           toast.error(`❌ ${errorMessage}`);
@@ -139,9 +143,12 @@ export default function EditBadgeModal({
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/badges/${badge.id}?userId=${userId}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/badges/${badge.id}?userId=${userId}&shopId=${shopId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         toast.success(`Badge "${badge.name}" supprimé !`);

@@ -74,7 +74,9 @@ export default function PollDisplay({
         });
         if (response.ok) {
           setSelectedOption(null);
-          onVote?.(optionId);
+          if (onVote) {
+            onVote(optionId); // Rafraîchissement immédiat
+          }
         }
       } else {
         const response = await fetch("/api/polls/vote", {
@@ -88,7 +90,9 @@ export default function PollDisplay({
         });
         if (response.ok) {
           setSelectedOption(optionId);
-          onVote?.(optionId);
+          if (onVote) {
+            onVote(optionId); // Rafraîchissement immédiat
+          }
         }
       }
     } catch (error) {

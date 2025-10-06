@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageSquare, Share2, Heart, Pin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,6 +27,40 @@ const REACTION_EMOJIS: Record<ReactionType, string> = {
   APPLAUSE: "👏",
 };
 
+// Fonction helper pour convertir les classes Tailwind en valeurs CSS
+const getCategoryColorValue = (colorClass: string): string => {
+  // Si c'est déjà une couleur hexadécimale, la retourner directement
+  if (colorClass.startsWith("#")) {
+    return colorClass;
+  }
+
+  const colorMap: Record<string, string> = {
+    "bg-blue-500": "#3b82f6",
+    "bg-orange-500": "#f97316",
+    "bg-emerald-500": "#10b981",
+    "bg-green-500": "#22c55e",
+    "bg-red-500": "#ef4444",
+    "bg-violet-500": "#8b5cf6",
+    "bg-purple-500": "#a855f7",
+    "bg-amber-500": "#f59e0b",
+    "bg-yellow-500": "#eab308",
+    "bg-pink-500": "#ec4899",
+    "bg-cyan-500": "#06b6d4",
+    "bg-indigo-500": "#6366f1",
+    "bg-teal-500": "#14b8a6",
+  };
+
+  return colorMap[colorClass] || "#3b82f6"; // Bleu par défaut
+};
+
+// Fonction pour convertir hex en rgba avec opacité
+const hexToRgba = (hex: string, opacity: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
+
 interface Post {
   slug: string;
   id: string;
@@ -42,7 +77,7 @@ interface Post {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
+    image?: string;
   };
   poll?: {
     id: string;
@@ -79,6 +114,58 @@ export default function PostCard({
 }: PostCardProps) {
   const { colors } = useTheme();
   const [showReactionDropdown, setShowReactionDropdown] = useState(false);
+  const [localReactions, setLocalReactions] = useState(post.reactions || []);
+  const [localUserReaction, setLocalUserReaction] = useState(
+    post.userReaction || null
+  );
+  const [localReactionsCount, setLocalReactionsCount] = useState(
+    post._count.reactions
+  );
+
+  // Calculer la couleur de la catégorie
+  const categoryColor = post.category
+    ? getCategoryColorValue(post.category.color)
+    : null;
+
+  // Helper pour obtenir les initiales
+  const getInitials = (name: string) => {
+    return (
+      name
+        ?.split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase() || "?"
+    );
+  };
+
+  // Helper pour formater la date avec heure
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+    const timeStr = date.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (diffInHours < 1) {
+      const minutes = Math.floor(diffInMs / (1000 * 60));
+      return `Il y a ${minutes} min`;
+    } else if (diffInHours < 24) {
+      return `Il y a ${Math.floor(diffInHours)}h • ${timeStr}`;
+    } else if (diffInDays < 7) {
+      return `Il y a ${Math.floor(diffInDays)}j • ${timeStr}`;
+    } else {
+      const dateStr = date.toLocaleDateString("fr-FR", {
+        day: "numeric",
+        month: "short",
+      });
+      return `${dateStr} • ${timeStr}`;
+    }
+  };
 
   // Gérer le clic à l'extérieur pour fermer le dropdown
   const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -92,11 +179,14 @@ export default function PostCard({
   useEffect(() => {
     if (showReactionDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [showReactionDropdown, handleClickOutside]);
   const handleShare = () => {
-    const url = `${window.location.origin}/community/posts/${post.slug || post.id}`;
+    const url = `${window.location.origin}/community/posts/${
+      post.slug || post.id
+    }`;
     navigator.clipboard.writeText(url);
     toast.success("Lien copié dans le presse-papiers !");
   };
@@ -108,6 +198,63 @@ export default function PostCard({
     }
 
     setShowReactionDropdown(false);
+
+    // Mise à jour optimiste : mettre à jour l'UI immédiatement
+    const previousReaction = localUserReaction;
+    const previousReactions = [...localReactions];
+    const previousCount = localReactionsCount;
+
+    // Si l'utilisateur avait déjà réagi
+    if (localUserReaction === type) {
+      // Retirer la réaction
+      setLocalUserReaction(null);
+      setLocalReactionsCount((prev) => prev - 1);
+      setLocalReactions((prev) => {
+        return prev
+          .map((r) =>
+            r.type === type ? { ...r, count: Math.max(0, r.count - 1) } : r
+          )
+          .filter((r) => r.count > 0);
+      });
+    } else {
+      // Ajouter ou changer la réaction
+      setLocalUserReaction(type);
+
+      if (localUserReaction) {
+        // Changer de réaction (enlever l'ancienne, ajouter la nouvelle)
+        setLocalReactions((prev) => {
+          const updated = prev.map((r) => {
+            if (r.type === localUserReaction) {
+              return { ...r, count: Math.max(0, r.count - 1) };
+            }
+            if (r.type === type) {
+              return { ...r, count: r.count + 1 };
+            }
+            return r;
+          });
+
+          // Ajouter la nouvelle réaction si elle n'existe pas
+          if (!updated.find((r) => r.type === type)) {
+            updated.push({ type, count: 1 });
+          }
+
+          return updated.filter((r) => r.count > 0);
+        });
+      } else {
+        // Nouvelle réaction
+        setLocalReactionsCount((prev) => prev + 1);
+        setLocalReactions((prev) => {
+          const existing = prev.find((r) => r.type === type);
+          if (existing) {
+            return prev.map((r) =>
+              r.type === type ? { ...r, count: r.count + 1 } : r
+            );
+          } else {
+            return [...prev, { type, count: 1 }];
+          }
+        });
+      }
+    }
 
     try {
       const response = await fetch(`/api/posts/${post.id}/reactions`, {
@@ -121,14 +268,34 @@ export default function PostCard({
       });
 
       if (response.ok) {
+        const data = await response.json();
+        // Mettre à jour avec les vraies données du serveur
+        setLocalReactions(data.reactions || []);
+        setLocalUserReaction(data.userReaction || null);
+        setLocalReactionsCount(
+          data.reactions?.reduce(
+            (sum: number, r: ReactionData) => sum + r.count,
+            0
+          ) || 0
+        );
         toast.success("Réaction ajoutée !");
+
+        // Rafraîchir en arrière-plan (optionnel, pour sync avec d'autres users)
         if (onVote) {
-          onVote(); // Rafraîchir la liste des posts
+          setTimeout(() => onVote(), 1000);
         }
       } else {
+        // Rollback en cas d'erreur
+        setLocalUserReaction(previousReaction);
+        setLocalReactions(previousReactions);
+        setLocalReactionsCount(previousCount);
         toast.error("Erreur lors de l'ajout de la réaction");
       }
     } catch (error) {
+      // Rollback en cas d'erreur
+      setLocalUserReaction(previousReaction);
+      setLocalReactions(previousReactions);
+      setLocalReactionsCount(previousCount);
       console.error("Error adding reaction:", error);
       toast.error("Erreur lors de l'ajout de la réaction");
     }
@@ -136,18 +303,85 @@ export default function PostCard({
 
   return (
     <div
-      className="pb-4 sm:pb-8"
+      className={`pb-4 sm:pb-8 ${post.isPinned ? "relative" : ""}`}
       style={{
-        ...((!isLast) && {
-          borderBottom: `1px solid ${colors.Bordures}`
-        })
+        ...(!isLast && {
+          borderBottom: `1px solid ${colors.Bordures}`,
+        }),
       }}
     >
-      <Link href={`/community/posts/${post.slug || post.id}`} className="block cursor-pointer">
+      <Link
+        href={`/community/posts/${post.slug || post.id}`}
+        className="block cursor-pointer"
+      >
+        {/* Author info and badge */}
+        <div className="flex items-start justify-between pt-3 sm:pt-6 mb-3 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Avatar className="h-7 w-7 sm:h-9 sm:w-9 flex-shrink-0">
+              <AvatarImage src={post.author.image || undefined} />
+              <AvatarFallback
+                className="text-[10px] sm:text-xs font-semibold text-white"
+                style={{ backgroundColor: colors.Posts }}
+              >
+                {getInitials(post.author.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <span
+                className="text-xs sm:text-sm font-semibold truncate"
+                style={{ color: colors.Police }}
+              >
+                {post.author.name}
+              </span>
+              <span className="text-[10px] sm:text-xs text-gray-500">
+                {formatDate(post.createdAt)}
+              </span>
+            </div>
+          </div>
+
+          {/* Badges à droite (Catégorie et Épinglé) */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Badge de catégorie */}
+            {post.category && categoryColor && (
+              <Badge
+                variant="outline"
+                className="flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 border-0"
+                style={{
+                  backgroundColor: hexToRgba(categoryColor, 0.1),
+                  color: categoryColor,
+                }}
+              >
+                <div
+                  className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: categoryColor }}
+                />
+                <span className="text-[9px] sm:text-[10px] font-semibold whitespace-nowrap">
+                  {post.category.name.toUpperCase()}
+                </span>
+              </Badge>
+            )}
+
+            {/* Badge épinglé */}
+            {post.isPinned && (
+              <Badge
+                variant="secondary"
+                className="flex items-center gap-1 sm:gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors px-1.5 py-0.5 sm:px-2.5 sm:py-1"
+              >
+                <Pin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+                <span className="text-[9px] sm:text-[10px] font-semibold whitespace-nowrap">
+                  ÉPINGLÉ
+                </span>
+              </Badge>
+            )}
+          </div>
+        </div>
+
         {/* Post Title and Content */}
-        <div className="mb-4 sm:mb-6 pt-4 sm:pt-7 relative">
+        <div className="mb-4 sm:mb-6">
           <h2
-            className="text-sm sm:text-[13px] md:text-[15px] font-semibold mb-2 leading-tight line-clamp-2 sm:line-clamp-1 transition-colors duration-200"
+            className={`text-sm sm:text-[13px] md:text-[15px] mb-2 leading-tight line-clamp-2 sm:line-clamp-1 transition-colors duration-200 ${
+              post.isPinned ? "font-bold" : "font-semibold"
+            }`}
             style={{ color: colors.Police }}
           >
             {post.title}
@@ -196,13 +430,13 @@ export default function PostCard({
         <div className="relative">
           <Button
             variant="outline"
-            className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 rounded-full border-2 transition-colors ${
-              post.userReaction
+            className={`flex items-center gap-1.5 sm:gap-3 px-2.5 sm:px-6 py-1.5 sm:py-3 h-8 sm:h-auto rounded-full border-2 transition-colors ${
+              localUserReaction
                 ? "text-red-600 bg-red-50"
                 : "text-gray-700 bg-gray-50 hover:bg-gray-100"
             }`}
             style={{
-              borderColor: colors.Bordures
+              borderColor: colors.Bordures,
             }}
             onClick={(e) => {
               e.preventDefault();
@@ -211,9 +445,13 @@ export default function PostCard({
             }}
             disabled={!currentUser}
           >
-            <Heart className={`h-4 sm:h-5 w-4 sm:w-5 stroke-2 ${post.userReaction ? "fill-current" : ""}`} />
-            <span className="text-sm sm:text-base font-medium">
-              {post._count.reactions}
+            <Heart
+              className={`h-3.5 w-3.5 sm:h-5 sm:w-5 stroke-2 ${
+                localUserReaction ? "fill-current" : ""
+              }`}
+            />
+            <span className="text-xs sm:text-base font-medium">
+              {localReactionsCount}
             </span>
           </Button>
 
@@ -222,8 +460,9 @@ export default function PostCard({
             <div className="reaction-dropdown absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg p-2 z-10">
               <div className="flex gap-1 mb-2">
                 {Object.entries(REACTION_EMOJIS).map(([type, emoji]) => {
-                  const isSelected = post.userReaction === type;
-                  const reactionCount = post.reactions?.find((r) => r.type === type)?.count || 0;
+                  const isSelected = localUserReaction === type;
+                  const reactionCount =
+                    localReactions?.find((r) => r.type === type)?.count || 0;
                   return (
                     <div key={type} className="flex flex-col items-center">
                       <button
@@ -247,7 +486,9 @@ export default function PostCard({
                           <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-white" />
                         )}
                       </button>
-                      <span className="text-xs text-gray-500 mt-1">{reactionCount}</span>
+                      <span className="text-xs text-gray-500 mt-1">
+                        {reactionCount}
+                      </span>
                     </div>
                   );
                 })}
@@ -258,7 +499,7 @@ export default function PostCard({
 
         <Button
           variant="outline"
-          className="flex items-center gap-2 sm:gap-3 bg-gray-50 px-3 sm:px-6 py-2 sm:py-3 rounded-full border-2 hover:bg-gray-100 text-gray-700"
+          className="flex items-center gap-1.5 sm:gap-3 bg-gray-50 px-2.5 sm:px-6 py-1.5 sm:py-3 h-8 sm:h-auto rounded-full border-2 hover:bg-gray-100 text-gray-700"
           style={{ borderColor: colors.Bordures }}
           onClick={(e) => {
             e.preventDefault();
@@ -266,15 +507,15 @@ export default function PostCard({
             window.location.href = `/community/posts/${post.slug || post.id}`;
           }}
         >
-          <MessageSquare className="h-4 sm:h-5 w-4 sm:w-5 stroke-2" />
-          <span className="text-sm sm:text-base font-medium">
+          <MessageSquare className="h-3.5 w-3.5 sm:h-5 sm:w-5 stroke-2" />
+          <span className="text-xs sm:text-base font-medium">
             {post._count.comments}
           </span>
         </Button>
 
         <Button
           variant="outline"
-          className="ml-auto flex items-center gap-1 sm:gap-2 bg-white px-2 sm:px-4 py-2 rounded-full hover:bg-gray-100 text-gray-600"
+          className="ml-auto flex items-center gap-1 sm:gap-2 bg-white px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-auto rounded-full hover:bg-gray-100 text-gray-600"
           style={{ borderColor: colors.Bordures }}
           onClick={(e) => {
             e.preventDefault();
@@ -282,7 +523,7 @@ export default function PostCard({
             handleShare();
           }}
         >
-          <Share2 className="h-3 sm:h-4 w-3 sm:w-4" />
+          <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
           <span className="text-xs sm:text-sm">Partager</span>
         </Button>
       </div>

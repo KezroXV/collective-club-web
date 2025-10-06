@@ -59,6 +59,7 @@ export default function ModalsManager({
         isOpen={showCustomization || showThemeModal}
         onClose={onCloseCustomizationModal}
         userId={userId}
+        shopId={shopId}
       />
 
       <CategoriesModal

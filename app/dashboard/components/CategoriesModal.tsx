@@ -197,28 +197,28 @@ export default function CategoriesModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         size="full"
-        className="sm:max-w-4xl w-[95vw] max-h-[80vh] overflow-hidden"
+        className="sm:max-w-4xl w-[95vw] max-h-[85vh] sm:max-h-[80vh] overflow-hidden p-4 sm:p-6"
       >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+        <DialogHeader className="pb-3 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-xl font-semibold">
             Gestion des Catégories
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">
             Gérez les catégories pour organiser les posts de votre communauté
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Barre de recherche et bouton d'ajout */}
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <Input
                 type="text"
-                placeholder="Rechercher une catégorie..."
+                placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10"
+                className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
               />
             </div>
 
@@ -227,24 +227,25 @@ export default function CategoriesModal({
               <Button
                 variant="default"
                 onClick={() => setShowCreateModal(true)}
-                className="shrink-0 flex items-center gap-2"
+                className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 text-xs sm:text-sm px-3"
               >
-                <Plus className="h-4 w-4" />
-                Nouvelle catégorie
+                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Nouvelle catégorie</span>
+                <span className="xs:hidden">Catégorie</span>
               </Button>
             )}
           </div>
 
           {/* Stats rapides */}
           {!isLoading && (
-            <div className="flex gap-4 text-sm text-gray-600">
-              <span>Total: {categories.length} catégories</span>
-              <span>Affichées: {filteredCategories.length} catégories</span>
+            <div className="flex gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 flex-wrap">
+              <span>Total: {categories.length}</span>
+              <span>Affichées: {filteredCategories.length}</span>
             </div>
           )}
 
           {/* Liste des catégories */}
-          <div className="overflow-y-auto max-h-96 space-y-3">
+          <div className="overflow-y-auto max-h-[50vh] sm:max-h-96 space-y-2 sm:space-y-3">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
@@ -264,30 +265,32 @@ export default function CategoriesModal({
                   key={category.id}
                   className="hover:shadow-md transition-all duration-200"
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3 flex-1">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                         <div
-                          className="w-4 h-4 rounded-full"
+                          className="w-3 h-3 sm:w-4 sm:h-4 rounded-full flex-shrink-0"
                           style={{ backgroundColor: category.color }}
                         ></div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                             {category.name}
                           </h4>
                           {category.description && (
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 line-clamp-1">
                               {category.description}
                             </p>
                           )}
-                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                          <div className="flex items-center gap-2 sm:gap-4 mt-1 sm:mt-2 text-[10px] sm:text-xs text-gray-500 flex-wrap">
                             <span>{category._count.posts} posts</span>
-                            <span>Ordre: {category.order}</span>
+                            <span className="hidden xs:inline">
+                              Ordre: {category.order}
+                            </span>
                             <Badge
                               variant={
                                 category.isActive ? "default" : "secondary"
                               }
-                              className="text-xs"
+                              className="text-[10px] sm:text-xs px-1.5 py-0.5"
                             >
                               {category.isActive ? "Active" : "Inactive"}
                             </Badge>
@@ -297,7 +300,7 @@ export default function CategoriesModal({
 
                       {/* Actions - visible seulement pour non-MEMBER */}
                       {userRole && userRole !== "MEMBER" && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -307,7 +310,7 @@ export default function CategoriesModal({
                                 name: category.name,
                               })
                             }
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 h-7 w-7 sm:h-8 sm:w-8 p-0"
                             disabled={category._count.posts > 0}
                             title={
                               category._count.posts > 0
@@ -315,7 +318,7 @@ export default function CategoriesModal({
                                 : "Supprimer"
                             }
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         </div>
                       )}
@@ -330,7 +333,7 @@ export default function CategoriesModal({
         {/* Modal de création de catégorie */}
         {showCreateModal && (
           <Dialog open={true} onOpenChange={() => setShowCreateModal(false)}>
-            <DialogContent>
+            <DialogContent className="w-[90vw] max-w-md mx-2">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
                   <Plus className="h-5 w-5" />
@@ -481,4 +484,3 @@ export default function CategoriesModal({
     </Dialog>
   );
 }
-
