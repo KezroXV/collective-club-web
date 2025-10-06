@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import ThemeWrapper from "@/components/ThemeWrapper";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { usePermissions } from "@/lib/hooks/usePermissions";
-import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import DashboardHeader from "./components/DashboardHeader";
@@ -23,7 +21,6 @@ function DashboardPageContent() {
   const [showCategoriesModal, setShowCategoriesModal] = useState(false);
   const [actualShopId, setActualShopId] = useState<string>("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const { colors } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -109,25 +106,19 @@ function DashboardPageContent() {
   // Afficher un loader pendant la vérification
   if (loading) {
     return (
-      <ThemeWrapper
-        applyBackgroundColor={true}
-        className="min-h-screen flex items-center justify-center"
-      >
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Vérification des permissions...</p>
         </div>
-      </ThemeWrapper>
+      </div>
     );
   }
 
   // Afficher un message d'erreur si pas autorisé (ne devrait pas arriver à cause de la redirection)
   if (!hasAccess) {
     return (
-      <ThemeWrapper
-        applyBackgroundColor={true}
-        className="min-h-screen flex items-center justify-center"
-      >
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Accès refusé</h1>
           <p className="text-gray-600 mb-4">
@@ -138,17 +129,14 @@ function DashboardPageContent() {
             <Button>Retour à la communauté</Button>
           </Link>
         </div>
-      </ThemeWrapper>
+      </div>
     );
   }
 
   return (
-    <ThemeWrapper
-      applyBackgroundColor={true}
-      className="min-h-screen p-3 sm:p-6 lg:p-8"
-    >
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-        <DashboardHeader shopId={shopId} borderColor={colors.Bordures} />
+        <DashboardHeader shopId={shopId} borderColor="#E5E7EB" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
           <ManagementSection
@@ -158,14 +146,14 @@ function DashboardPageContent() {
             onThemeClick={handleThemeClick}
             shopId={shopId}
             refreshTrigger={refreshTrigger}
-            borderColor={colors.Bordures}
+            borderColor="#E5E7EB"
           />
 
           <ShopManagementSection
             userId={currentUser?.id}
             shopId={shopId}
             onThemeClick={handleThemeClick}
-            borderColor={colors.Bordures}
+            borderColor="#E5E7EB"
           />
         </div>
 
@@ -186,7 +174,7 @@ function DashboardPageContent() {
           onCategoryCreated={handleCategoryCreated}
         />
       </div>
-    </ThemeWrapper>
+    </div>
   );
 }
 
