@@ -134,6 +134,7 @@ export const authOptions: NextAuthOptions = {
 
           // Mettre à jour le token avec les infos de cet utilisateur
           token.sub = shopUser.id;
+          token.email = shopUser.email;
           token.role = shopUser.role as "ADMIN" | "MODERATOR" | "MEMBER";
           token.isShopOwner = shopUser.isShopOwner;
           token.shopId = shopUser.shopId;
@@ -141,11 +142,22 @@ export const authOptions: NextAuthOptions = {
           console.error("🚫 JWT Error:", error);
           throw new Error("Authentication failed");
         }
-      } else if (token.sub) {
-        // Connexions suivantes
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
+      } else if (token.sub && token.email) {
+        // Connexions suivantes - récupérer le shopId actuel
+        const currentShopId = await getCurrentShopId();
+
+        if (!currentShopId) {
+          throw new Error("No shopId available");
+        }
+
+        // Récupérer l'utilisateur pour CE shop spécifique
+        const dbUser = await prisma.user.findFirst({
+          where: {
+            email: token.email as string,
+            shopId: currentShopId,
+          },
           select: {
+            id: true,
             role: true,
             isShopOwner: true,
             shopId: true,
@@ -157,6 +169,8 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (dbUser) {
+          // Mettre à jour le token avec les infos de l'utilisateur pour CE shop
+          token.sub = dbUser.id;
           token.role = dbUser.role as "ADMIN" | "MODERATOR" | "MEMBER";
           token.isShopOwner = dbUser.isShopOwner;
           token.shopId = dbUser.shopId;
@@ -164,7 +178,47 @@ export const authOptions: NextAuthOptions = {
           token.picture = dbUser.image;
           token.roleInfo = dbUser.roleInfo;
         } else {
-          throw new Error("User not found"); // ❌ BLOQUER si utilisateur n'existe plus
+          // L'utilisateur n'existe pas dans ce shop - créer un nouveau compte MEMBER
+          const rolesCount = await prisma.role.count({
+            where: { shopId: currentShopId }
+          });
+
+          if (rolesCount === 0) {
+            await createDefaultRolesForShop(currentShopId);
+          }
+
+          const existingAdmin = await prisma.user.findFirst({
+            where: {
+              shopId: currentShopId,
+              isShopOwner: true,
+            },
+          });
+
+          const role = !existingAdmin ? "ADMIN" : "MEMBER";
+          const isShopOwner = !existingAdmin;
+
+          const newShopUser = await prisma.user.create({
+            data: {
+              email: token.email as string,
+              name: token.name as string,
+              image: token.picture as string,
+              shopId: currentShopId,
+              role: role,
+              isShopOwner: isShopOwner,
+            },
+          });
+
+          if (role === "ADMIN" && isShopOwner) {
+            await prisma.shop.update({
+              where: { id: currentShopId },
+              data: { ownerId: newShopUser.id },
+            });
+          }
+
+          token.sub = newShopUser.id;
+          token.role = newShopUser.role as "ADMIN" | "MODERATOR" | "MEMBER";
+          token.isShopOwner = newShopUser.isShopOwner;
+          token.shopId = newShopUser.shopId;
         }
       }
 
