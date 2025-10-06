@@ -83,6 +83,7 @@ model Shop {
   pointTransactions PointTransaction[]
   userBadges  UserBadge[]
   roles       Role[]
+  userOnboarding UserOnboarding[]
 
   @@map("shops")
 }
@@ -120,6 +121,7 @@ model User {
   userPoints UserPoints[]
   pointTransactions PointTransaction[]
   userBadges UserBadge[]
+  onboarding UserOnboarding[]
 
   // Relations avec Shop et Role
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
@@ -431,5 +433,29 @@ enum PointAction {
   REACTION_RECEIVED // +2 points
   BADGE_UNLOCKED    // -points requis
   DAILY_LOGIN       // +1 point
+}
+
+// 🎯 SYSTÈME D'ONBOARDING
+model UserOnboarding {
+  id              String   @id @default(cuid())
+  userId          String
+  shopId          String   // ✅ OBLIGATOIRE pour multi-tenant
+
+  // Tâches d'onboarding
+  hasLikedPost    Boolean  @default(false)
+  hasCommentedPost Boolean @default(false)
+  hasCreatedPost  Boolean  @default(false)
+
+  // Métadonnées
+  completedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop            Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, shopId], name: "userId_shopId") // Un onboarding par user par shop
+  @@map("user_onboarding")
 }
 

@@ -4,6 +4,7 @@ import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
 import { getAuthContext } from "@/lib/auth-context";
+import { updateOnboardingTask } from "@/lib/onboarding";
 
 const prisma = new PrismaClient();
 
@@ -215,6 +216,14 @@ export async function POST(
     } catch (pointsError) {
       console.error("Error awarding points for comment creation:", pointsError);
       // Ne pas faire échouer la création du commentaire si l'attribution des points échoue
+    }
+
+    // 🎯 METTRE À JOUR L'ONBOARDING (premier commentaire)
+    try {
+      await updateOnboardingTask(authorId, shopId, "hasCommentedPost");
+    } catch (onboardingError) {
+      console.error("Error updating onboarding for first comment:", onboardingError);
+      // Ne pas faire échouer la création du commentaire si l'onboarding échoue
     }
 
     // Traiter les réactions du nouveau commentaire

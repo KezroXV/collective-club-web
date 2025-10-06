@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
+import { updateOnboardingTask } from "@/lib/onboarding";
 
 const prisma = new PrismaClient();
 
@@ -126,6 +127,14 @@ export async function POST(
       } catch (pointsError) {
         console.error("Error awarding points for reaction received:", pointsError);
         // Ne pas faire échouer la création de la réaction si l'attribution des points échoue
+      }
+
+      // 🎯 METTRE À JOUR L'ONBOARDING (première réaction)
+      try {
+        await updateOnboardingTask(userId, shopId, "hasLikedPost");
+      } catch (onboardingError) {
+        console.error("Error updating onboarding for first like:", onboardingError);
+        // Ne pas faire échouer la création de la réaction si l'onboarding échoue
       }
 
       return NextResponse.json({ action: "created", reaction: newReaction });

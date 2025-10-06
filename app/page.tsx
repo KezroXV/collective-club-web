@@ -13,6 +13,8 @@ import ThemeWrapper from "@/components/ThemeWrapper";
 import { useShopPersistence } from "@/lib/useShopPersistence";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAutoRefresh } from "@/lib/hooks/useAutoRefresh";
+import { useOnboarding } from "@/lib/hooks/useOnboarding";
+import OnboardingCard from "@/components/OnboardingCard";
 // ReactionPicker retiré pour n'afficher que coeur + commentaires
 
 interface Post {
@@ -66,6 +68,9 @@ function HomePageContent() {
 
   // 🏪 Initialiser la persistance du shop
   const { currentShop } = useShopPersistence();
+
+  // 🎯 Récupérer l'état d'onboarding
+  const { tasks, progress, isComplete, loading: onboardingLoading } = useOnboarding(currentUser?.id);
 
   // Fetch posts
   const fetchPosts = async () => {
@@ -164,6 +169,12 @@ function HomePageContent() {
 
       {/* Hero Banner */}
       <HeroBanner />
+
+      {/* Onboarding Widget - Position fixe à gauche */}
+      {!onboardingLoading && !isComplete && (
+        <OnboardingCard tasks={tasks} progress={progress} />
+      )}
+
       {/* Section unifiée: Filtres + Posts */}
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
