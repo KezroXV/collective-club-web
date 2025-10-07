@@ -65,11 +65,25 @@ function SignInContent() {
       // Définir un cookie pour le contexte (backup au state)
       document.cookie = `auth_context=${isShopifyEmbedded ? 'shopify' : 'public'}; path=/; SameSite=${isShopifyEmbedded ? 'None' : 'Lax'}; Secure`;
 
-      // Rediriger vers Google OAuth avec custom redirect
-      // Note: NextAuth ne supporte pas le custom callback facilement,
-      // donc on construit l'URL Google OAuth manuellement
+      // Construire l'URL Google OAuth
       const googleAuthUrl = buildGoogleAuthUrl(state, isShopifyEmbedded);
-      window.location.href = googleAuthUrl;
+
+      // ✅ SOLUTION: Si dans iframe Shopify, SORTIR de l'iframe avant OAuth
+      if (isShopifyEmbedded) {
+        // Google bloque OAuth dans les iframes, donc on redirige le PARENT
+        console.log("🔓 Sortie de l'iframe Shopify pour OAuth Google");
+
+        // Option 1: Utiliser window.top (marche dans la plupart des cas)
+        if (window.top) {
+          window.top.location.href = googleAuthUrl;
+        } else {
+          // Fallback: forcer la navigation du parent
+          window.parent.location.href = googleAuthUrl;
+        }
+      } else {
+        // Contexte normal: redirection classique
+        window.location.href = googleAuthUrl;
+      }
 
     } catch (error) {
       console.error("Erreur de connexion:", error);
