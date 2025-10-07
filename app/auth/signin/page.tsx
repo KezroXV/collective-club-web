@@ -44,11 +44,54 @@ function SignInContent() {
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn("google", { callbackUrl });
+      // Détecter le contexte (Shopify embedded ou front public)
+      const isInIframe = window !== window.parent;
+      const isShopifyEmbedded = isInIframe && shop;
+
+      // Créer le state parameter avec le contexte
+      let state = "";
+      if (isShopifyEmbedded) {
+        // Encoder le contexte Shopify dans le state
+        state = JSON.stringify({
+          context: "shopify",
+          shop: shop,
+        });
+      } else {
+        state = JSON.stringify({
+          context: "public",
+        });
+      }
+
+      // Définir un cookie pour le contexte (backup au state)
+      document.cookie = `auth_context=${isShopifyEmbedded ? 'shopify' : 'public'}; path=/; SameSite=${isShopifyEmbedded ? 'None' : 'Lax'}; Secure`;
+
+      // Rediriger vers Google OAuth avec custom redirect
+      // Note: NextAuth ne supporte pas le custom callback facilement,
+      // donc on construit l'URL Google OAuth manuellement
+      const googleAuthUrl = buildGoogleAuthUrl(state, isShopifyEmbedded);
+      window.location.href = googleAuthUrl;
+
     } catch (error) {
       console.error("Erreur de connexion:", error);
       setIsLoading(false);
     }
+  };
+
+  const buildGoogleAuthUrl = (state: string, isShopifyEmbedded: boolean) => {
+    const redirectUri = `${window.location.origin}/api/auth/callback/google`;
+    const scope = "openid email profile";
+
+    const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      redirect_uri: redirectUri,
+      response_type: "code",
+      scope: scope,
+      state: encodeURIComponent(state),
+      access_type: "offline",
+      prompt: "select_account",
+    });
+
+    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   return (
