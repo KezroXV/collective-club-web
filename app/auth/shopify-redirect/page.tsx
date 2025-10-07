@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 /**
  * Page intermédiaire pour rediriger l'utilisateur dans l'iframe Shopify
  * Utilise Shopify App Bridge pour effectuer la navigation dans l'admin
  */
-export default function ShopifyRedirectPage() {
+function ShopifyRedirectContent() {
   const searchParams = useSearchParams();
   const shop = searchParams.get("shop");
 
@@ -31,6 +31,21 @@ export default function ShopifyRedirectPage() {
         <p className="text-gray-600">Connexion en cours...</p>
       </div>
     </div>
+  );
+}
+
+export default function ShopifyRedirectPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <ShopifyRedirectContent />
+    </Suspense>
   );
 }
 

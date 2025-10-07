@@ -46,7 +46,7 @@ function SignInContent() {
     try {
       // Détecter le contexte (Shopify embedded ou front public)
       const isInIframe = window !== window.parent;
-      const isShopifyEmbedded = isInIframe && shop;
+      const isShopifyEmbedded = !!(isInIframe && shop);
 
       // Créer le state parameter avec le contexte
       let state = "";
