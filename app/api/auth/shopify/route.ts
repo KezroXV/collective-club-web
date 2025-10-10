@@ -48,7 +48,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const role: "ADMIN" | "MODERATOR" | "MEMBER" = !existingAdmin ? "ADMIN" : "MEMBER";
+    const role: "ADMIN" | "MODERATOR" | "MEMBER" = !existingAdmin
+      ? "ADMIN"
+      : "MEMBER";
     const isShopOwner = !existingAdmin;
 
     // Email générique pour l'utilisateur Shopify
@@ -115,23 +117,52 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Définir le cookie de session NextAuth
-    response.cookies.set("next-auth.session-token", token, {
+    // Détection du contexte Shopify embedded (iframe, admin)
+    const referer = request.headers.get("referer") || "";
+    const isShopifyEmbedded =
+      /admin\.shopify\.com/i.test(referer) ||
+      /\.myshopify\.com/i.test(referer) ||
+      !!request.cookies.get("shopDomain")?.value;
+
+    // Choisir le nom du cookie de session NextAuth
+    // En production HTTPS, utiliser __Secure-next-auth.session-token
+    const cookieName =
+      process.env.NODE_ENV === "production"
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token";
+
+    // Options cookies selon le contexte
+    const sessionCookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isShopifyEmbedded ? true : process.env.NODE_ENV === "production",
+      sameSite: isShopifyEmbedded
+        ? ("none" as const)
+        : process.env.NODE_ENV === "production"
+        ? ("none" as const)
+        : ("lax" as const),
       maxAge: 30 * 24 * 60 * 60,
       path: "/",
-    });
+    };
+
+    response.cookies.set(cookieName, token, sessionCookieOptions);
 
     // Définir aussi le cookie shopDomain
-    response.cookies.set("shopDomain", shop, {
+    const shopCookieOptions = {
       httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isShopifyEmbedded ? true : process.env.NODE_ENV === "production",
+      sameSite: isShopifyEmbedded
+        ? ("none" as const)
+        : process.env.NODE_ENV === "production"
+        ? ("none" as const)
+        : ("lax" as const),
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
-    });
+    };
+    response.cookies.set("shopDomain", shop, shopCookieOptions);
+
+    console.log(
+      `✅ Shopify auth success for ${shop}, user: ${user.id}, cookie: ${cookieName}, embedded=${isShopifyEmbedded}`
+    );
 
     return response;
   } catch (error) {
