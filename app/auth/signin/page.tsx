@@ -44,9 +44,32 @@ function SignInContent() {
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      // Utiliser NextAuth signIn pour gérer correctement les cookies OAuth
+      // Détecter si on est dans un iframe Shopify
+      const isInIframe = window !== window.parent;
+
+      // Construire l'URL de callback avec le shop param
+      let finalCallbackUrl = callbackUrl;
+      if (shop) {
+        // Ajouter le shop param au callback pour le préserver après OAuth
+        const url = new URL(callbackUrl, window.location.origin);
+        url.searchParams.set("shop", shop);
+        finalCallbackUrl = url.toString();
+      }
+
+      // Si on est dans un iframe Shopify, rediriger le parent window pour OAuth
+      if (isInIframe && shop) {
+        // Construire l'URL de sign-in avec le shop param
+        // On utilise signIn côté client mais on force la redirection du parent
+        const signInUrl = `/api/auth/signin?callbackUrl=${encodeURIComponent(finalCallbackUrl)}`;
+
+        // Rediriger le parent window (sortir de l'iframe pour OAuth)
+        window.top?.location.replace(signInUrl);
+        return;
+      }
+
+      // Sinon, utiliser NextAuth signIn classique
       await signIn("google", {
-        callbackUrl: callbackUrl,
+        callbackUrl: finalCallbackUrl,
         redirect: true,
       });
     } catch (error) {

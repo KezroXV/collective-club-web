@@ -83,10 +83,10 @@ export default withAuth(
 
   // 🏪 GESTION SHOP (logique existante)
   const response = NextResponse.next();
-  
+
   // Vérifier si on a un paramètre shop dans l'URL
   const shopParam = request.nextUrl.searchParams.get('shop');
-  
+
   if (shopParam) {
     // Définir un cookie avec le shopDomain pour les futures requêtes
     response.cookies.set('shopDomain', shopParam, {
@@ -96,7 +96,22 @@ export default withAuth(
       path: '/'
     });
   }
-  
+
+  // Pour les routes auth, préserver le shop param dans les cookies même sans query param
+  // (important pour le flow OAuth qui peut perdre les query params)
+  if (pathname.startsWith('/api/auth')) {
+    const existingShop = request.cookies.get('shopDomain')?.value;
+    if (existingShop && !shopParam) {
+      // Le cookie existe déjà, on le préserve dans la response
+      response.cookies.set('shopDomain', existingShop, {
+        maxAge: 60 * 60 * 24 * 7,
+        httpOnly: false,
+        sameSite: 'lax',
+        path: '/'
+      });
+    }
+  }
+
   return response;
   },
   {
