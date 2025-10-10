@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import ThemeWrapper from "@/components/ThemeWrapper";
@@ -10,12 +10,25 @@ import { useState, useEffect, Suspense } from "react";
 
 function SignInContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const shop = searchParams.get("shop");
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const { colors, bannerImageUrl } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [loadingAdminCheck, setLoadingAdminCheck] = useState(true);
+  const [isInIframe, setIsInIframe] = useState(false);
+
+  // Détecter si on est dans un iframe Shopify
+  useEffect(() => {
+    const inIframe = window !== window.parent;
+    setIsInIframe(inIframe);
+
+    // Si on est dans un iframe Shopify avec un shop param, auto-auth
+    if (inIframe && shop) {
+      handleShopifyAuth();
+    }
+  }, [shop]);
 
   // Vérifier s'il existe déjà un admin
   useEffect(() => {
@@ -41,36 +54,52 @@ function SignInContent() {
     checkAdmin();
   }, [shop]);
 
+  // Authentification automatique Shopify (pour iframe)
+  const handleShopifyAuth = async () => {
+    if (!shop) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/shopify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shop }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Rediriger vers le dashboard avec le shop param
+        const url = new URL(callbackUrl, window.location.origin);
+        url.searchParams.set("shop", shop);
+        router.push(url.pathname + url.search);
+      } else {
+        console.error("Shopify auth failed:", data.error);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error("Shopify auth error:", error);
+      setIsLoading(false);
+    }
+  };
+
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      // Détecter si on est dans un iframe Shopify
-      const isInIframe = window !== window.parent;
-
-      // Déterminer le callback URL selon le contexte
-      let finalCallbackUrl = callbackUrl;
-
+      // Si on est dans un iframe Shopify, utiliser l'auth Shopify
       if (isInIframe && shop) {
-        // Dans l'iframe Shopify : rediriger vers la page de redirection Shopify
-        const redirectUrl = new URL("/auth/shopify-redirect", window.location.origin);
-        redirectUrl.searchParams.set("shop", shop);
-        finalCallbackUrl = redirectUrl.toString();
-      } else if (shop) {
-        // Hors iframe mais avec shop param : préserver le shop
+        await handleShopifyAuth();
+        return;
+      }
+
+      // Sinon, utiliser Google OAuth (accès direct)
+      let finalCallbackUrl = callbackUrl;
+      if (shop) {
         const url = new URL(callbackUrl, window.location.origin);
         url.searchParams.set("shop", shop);
         finalCallbackUrl = url.toString();
       }
 
-      // Si on est dans un iframe Shopify, forcer la redirection du parent window
-      if (isInIframe && shop) {
-        // Rediriger le parent window pour sortir de l'iframe (nécessaire pour OAuth)
-        const authUrl = `${window.location.origin}/api/auth/signin/google?callbackUrl=${encodeURIComponent(finalCallbackUrl)}`;
-        window.top?.location.replace(authUrl);
-        return;
-      }
-
-      // Accès direct (hors iframe) : utiliser NextAuth signIn classique
       await signIn("google", {
         callbackUrl: finalCallbackUrl,
         redirect: true,
