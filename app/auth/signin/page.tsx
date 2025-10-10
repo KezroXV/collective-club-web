@@ -47,27 +47,30 @@ function SignInContent() {
       // Détecter si on est dans un iframe Shopify
       const isInIframe = window !== window.parent;
 
-      // Construire l'URL de callback avec le shop param
+      // Déterminer le callback URL selon le contexte
       let finalCallbackUrl = callbackUrl;
-      if (shop) {
-        // Ajouter le shop param au callback pour le préserver après OAuth
+
+      if (isInIframe && shop) {
+        // Dans l'iframe Shopify : rediriger vers la page de redirection Shopify
+        const redirectUrl = new URL("/auth/shopify-redirect", window.location.origin);
+        redirectUrl.searchParams.set("shop", shop);
+        finalCallbackUrl = redirectUrl.toString();
+      } else if (shop) {
+        // Hors iframe mais avec shop param : préserver le shop
         const url = new URL(callbackUrl, window.location.origin);
         url.searchParams.set("shop", shop);
         finalCallbackUrl = url.toString();
       }
 
-      // Si on est dans un iframe Shopify, rediriger le parent window pour OAuth
+      // Si on est dans un iframe Shopify, forcer la redirection du parent window
       if (isInIframe && shop) {
-        // Construire l'URL de sign-in avec le shop param
-        // On utilise signIn côté client mais on force la redirection du parent
-        const signInUrl = `/api/auth/signin?callbackUrl=${encodeURIComponent(finalCallbackUrl)}`;
-
-        // Rediriger le parent window (sortir de l'iframe pour OAuth)
-        window.top?.location.replace(signInUrl);
+        // Rediriger le parent window pour sortir de l'iframe (nécessaire pour OAuth)
+        const authUrl = `${window.location.origin}/api/auth/signin/google?callbackUrl=${encodeURIComponent(finalCallbackUrl)}`;
+        window.top?.location.replace(authUrl);
         return;
       }
 
-      // Sinon, utiliser NextAuth signIn classique
+      // Accès direct (hors iframe) : utiliser NextAuth signIn classique
       await signIn("google", {
         callbackUrl: finalCallbackUrl,
         redirect: true,
