@@ -18,11 +18,13 @@ function SignInContent() {
   const [hasAdmin, setHasAdmin] = useState<boolean | null>(null);
   const [loadingAdminCheck, setLoadingAdminCheck] = useState(true);
   const [isInIframe, setIsInIframe] = useState(false);
+  const [authAttempted, setAuthAttempted] = useState(false);
 
   // Authentification automatique Shopify (pour iframe)
   const handleShopifyAuth = async () => {
-    if (!shop) return;
+    if (!shop || authAttempted) return;
 
+    setAuthAttempted(true);
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/shopify", {
@@ -41,10 +43,12 @@ function SignInContent() {
       } else {
         console.error("Shopify auth failed:", data.error);
         setIsLoading(false);
+        setAuthAttempted(false); // Permettre un nouvel essai
       }
     } catch (error) {
       console.error("Shopify auth error:", error);
       setIsLoading(false);
+      setAuthAttempted(false); // Permettre un nouvel essai
     }
   };
 
@@ -54,7 +58,8 @@ function SignInContent() {
     setIsInIframe(inIframe);
 
     // Si on est dans un iframe Shopify avec un shop param, auto-auth
-    if (inIframe && shop) {
+    // MAIS uniquement si pas déjà en cours de chargement
+    if (inIframe && shop && !isLoading) {
       handleShopifyAuth();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

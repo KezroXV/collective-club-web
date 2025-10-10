@@ -120,21 +120,26 @@ export default withAuth(
         const { pathname } = req.nextUrl;
         
         // Routes publiques
-        const publicRoutes = ['/auth/signin', '/auth/error', '/community'];
+        const publicRoutes = ['/auth/signin', '/auth/error', '/auth/shopify-redirect', '/community'];
         if (publicRoutes.includes(pathname) || pathname.startsWith('/community/posts/')) {
           return true;
         }
-        
+
+        // Routes API publiques (authentification)
+        if (pathname.startsWith('/api/auth')) {
+          return true; // Toutes les routes d'auth sont publiques
+        }
+
         // Routes protégées nécessitent une authentification
         if (pathname.startsWith('/dashboard') || pathname.startsWith('/api/admin')) {
           return !!token;
         }
-        
-        // Routes API nécessitent une authentification
+
+        // Autres routes API nécessitent une authentification
         if (pathname.startsWith('/api/')) {
           return !!token;
         }
-        
+
         return true;
       },
     },
