@@ -44,68 +44,15 @@ function SignInContent() {
   const handleSignIn = async () => {
     setIsLoading(true);
     try {
-      // Détecter le contexte (Shopify embedded ou front public)
-      const isInIframe = window !== window.parent;
-      const isShopifyEmbedded = !!(isInIframe && shop);
-
-      // Créer le state parameter avec le contexte
-      let state = "";
-      if (isShopifyEmbedded) {
-        // Encoder le contexte Shopify dans le state
-        state = JSON.stringify({
-          context: "shopify",
-          shop: shop,
-        });
-      } else {
-        state = JSON.stringify({
-          context: "public",
-        });
-      }
-
-      // Définir un cookie pour le contexte (backup au state)
-      document.cookie = `auth_context=${isShopifyEmbedded ? 'shopify' : 'public'}; path=/; SameSite=${isShopifyEmbedded ? 'None' : 'Lax'}; Secure`;
-
-      // Construire l'URL Google OAuth
-      const googleAuthUrl = buildGoogleAuthUrl(state, isShopifyEmbedded);
-
-      // ✅ SOLUTION: Si dans iframe Shopify, SORTIR de l'iframe avant OAuth
-      if (isShopifyEmbedded) {
-        // Google bloque OAuth dans les iframes, donc on redirige le PARENT
-        console.log("🔓 Sortie de l'iframe Shopify pour OAuth Google");
-
-        // Option 1: Utiliser window.top (marche dans la plupart des cas)
-        if (window.top) {
-          window.top.location.href = googleAuthUrl;
-        } else {
-          // Fallback: forcer la navigation du parent
-          window.parent.location.href = googleAuthUrl;
-        }
-      } else {
-        // Contexte normal: redirection classique
-        window.location.href = googleAuthUrl;
-      }
-
+      // Utiliser NextAuth signIn pour gérer correctement les cookies OAuth
+      await signIn("google", {
+        callbackUrl: callbackUrl,
+        redirect: true,
+      });
     } catch (error) {
       console.error("Erreur de connexion:", error);
       setIsLoading(false);
     }
-  };
-
-  const buildGoogleAuthUrl = (state: string, isShopifyEmbedded: boolean) => {
-    const redirectUri = `${window.location.origin}/api/auth/callback/google`;
-    const scope = "openid email profile";
-
-    const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-      redirect_uri: redirectUri,
-      response_type: "code",
-      scope: scope,
-      state: encodeURIComponent(state),
-      access_type: "offline",
-      prompt: "select_account",
-    });
-
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   return (

@@ -31,7 +31,7 @@ import {
 function HeaderContent() {
   const { currentUser } = useCurrentUser();
   const { canManageShop, isModerator } = usePermissions();
-  const { colors } = useTheme();
+  const { colors: themeColors } = useTheme();
   const currentShop = useCurrentShop();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -40,6 +40,17 @@ function HeaderContent() {
 
   // Récupérer le shop depuis les paramètres URL
   const shopParam = searchParams.get("shop");
+
+  // Thème par défaut pour le dashboard
+  const defaultColors = {
+    Posts: "#3B82F6",
+    Bordures: "#E5E7EB",
+    Fond: "#F9FAFB",
+    Police: "#111827",
+  };
+
+  // Utiliser le thème par défaut si on est sur /dashboard, sinon le thème personnalisé
+  const colors = pathname === "/dashboard" ? defaultColors : themeColors;
 
   // Vérifier si l'utilisateur peut accéder au dashboard
   const canAccessDashboard = canManageShop() || isModerator();

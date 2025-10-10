@@ -32,7 +32,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId, shopId])
   @@index([shopId]) // Index pour performance multi-tenant
   @@map("accounts")
 }
