@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const role = !existingAdmin ? "ADMIN" : "MEMBER";
+    const role: "ADMIN" | "MODERATOR" | "MEMBER" = !existingAdmin ? "ADMIN" : "MEMBER";
     const isShopOwner = !existingAdmin;
 
     // Email générique pour l'utilisateur Shopify
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         sub: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
+        role: user.role as "ADMIN" | "MODERATOR" | "MEMBER",
         shopId: user.shopId,
         isShopOwner: user.isShopOwner,
       },
