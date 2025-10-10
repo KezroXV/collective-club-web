@@ -19,41 +19,6 @@ function SignInContent() {
   const [loadingAdminCheck, setLoadingAdminCheck] = useState(true);
   const [isInIframe, setIsInIframe] = useState(false);
 
-  // Détecter si on est dans un iframe Shopify
-  useEffect(() => {
-    const inIframe = window !== window.parent;
-    setIsInIframe(inIframe);
-
-    // Si on est dans un iframe Shopify avec un shop param, auto-auth
-    if (inIframe && shop) {
-      handleShopifyAuth();
-    }
-  }, [shop]);
-
-  // Vérifier s'il existe déjà un admin
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        const params = new URLSearchParams();
-        if (shop) {
-          params.append("shop", shop);
-        }
-
-        const response = await fetch(`/api/admin/check?${params}`);
-        const data = await response.json();
-
-        setHasAdmin(data.hasAdmin);
-      } catch (error) {
-        console.error("Erreur lors de la vérification admin:", error);
-        setHasAdmin(false); // En cas d'erreur, considérer qu'il n'y a pas d'admin
-      } finally {
-        setLoadingAdminCheck(false);
-      }
-    };
-
-    checkAdmin();
-  }, [shop]);
-
   // Authentification automatique Shopify (pour iframe)
   const handleShopifyAuth = async () => {
     if (!shop) return;
@@ -82,6 +47,42 @@ function SignInContent() {
       setIsLoading(false);
     }
   };
+
+  // Détecter si on est dans un iframe Shopify et auto-authentifier
+  useEffect(() => {
+    const inIframe = window !== window.parent;
+    setIsInIframe(inIframe);
+
+    // Si on est dans un iframe Shopify avec un shop param, auto-auth
+    if (inIframe && shop) {
+      handleShopifyAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shop]);
+
+  // Vérifier s'il existe déjà un admin
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (shop) {
+          params.append("shop", shop);
+        }
+
+        const response = await fetch(`/api/admin/check?${params}`);
+        const data = await response.json();
+
+        setHasAdmin(data.hasAdmin);
+      } catch (error) {
+        console.error("Erreur lors de la vérification admin:", error);
+        setHasAdmin(false); // En cas d'erreur, considérer qu'il n'y a pas d'admin
+      } finally {
+        setLoadingAdminCheck(false);
+      }
+    };
+
+    checkAdmin();
+  }, [shop]);
 
   const handleSignIn = async () => {
     setIsLoading(true);
