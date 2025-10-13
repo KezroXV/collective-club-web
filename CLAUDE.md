@@ -23,19 +23,21 @@ npm run db:seed          # Alternative seed command (uses prisma db seed)
 
 ### Admin Management
 ```bash
-npm run admin analyze                                # Analyze admin status across all shops
-npm run admin create-admin <shopId> [email] [name]  # Create emergency admin for a shop
-npm run admin promote <userId> [requesterId]         # Promote existing user to admin
-npm run admin auto-repair                            # Auto-repair orphaned shops
-npm run admin audit                                  # Generate complete audit report
+npm run admin                           # Show available admin commands
+npm run admin -- analyze                # Analyze admin status across all shops
+npm run admin -- create-admin <shopId> [email] [name]  # Create emergency admin for a shop
+npm run admin -- promote <userId> [requesterId]        # Promote existing user to admin
+npm run admin -- auto-repair            # Auto-repair orphaned shops
+npm run admin -- audit                  # Generate complete audit report
 ```
 
 ### Data Recovery
 ```bash
-npm run recovery backup <shopId>                     # Backup complete shop data
-npm run recovery restore <backupPath> [newShopId]   # Restore from backup
-npm run recovery clean                               # Clean orphaned data
-npm run recovery migrate <sourceShopId> <targetShopId> [posts,categories,users]
+npm run recovery                        # Show available recovery commands
+npm run recovery -- backup <shopId>     # Backup complete shop data
+npm run recovery -- restore <backupPath> [newShopId]  # Restore from backup
+npm run recovery -- clean               # Clean orphaned data
+npm run recovery -- migrate <sourceShopId> <targetShopId> [posts,categories,users]
 ```
 
 ## Architecture
@@ -57,13 +59,25 @@ This is a **multi-tenant Shopify forum application** where each Shopify shop has
 - `validateUserBelongsToShop(userId, shopId)` - Verifies user ownership
 - `validateResourceBelongsToShop(type, resourceId, shopId)` - Verifies resource ownership
 
-### Authentication (NextAuth + Google OAuth)
+### Authentication
+**Google OAuth (NextAuth)**:
 - Uses NextAuth with Google OAuth provider
 - JWT-based sessions (not database sessions for multi-tenant compatibility)
 - On first sign-in to a shop, creates `User` and `Account` records with `shopId`
 - First user in a shop becomes `ADMIN` with `isShopOwner: true`
 - Subsequent users become `MEMBER`
+
+**Shopify Embedded App Authentication**:
+- Uses `@shopify/app-bridge-react` for embedded Shopify apps
+- Automatic authentication via `/api/auth/shopify` endpoint
+- Creates shop and user automatically on first access
+- First user becomes shop owner with `ADMIN` role
+- Uses generic email format: `shopify-user@{shop-domain}`
+- Sets persistent cookies for iframe authentication
+
+**Default Setup**:
 - Default roles (`ADMIN`, `MODERATOR`, `MEMBER`) are created automatically per shop
+- Default categories and badges are created on shop initialization
 
 **Session Data** includes:
 - `user.id`, `user.email`, `user.name`, `user.image`
