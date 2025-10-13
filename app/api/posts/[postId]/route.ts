@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { getAuthContext } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
@@ -270,26 +271,17 @@ export async function DELETE(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const { postId } = await params;
-    const body = await request.json();
-    const { userId, userRole } = body;
-
-    if (!userId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
 
     // Récupérer le post avec ses informations
     const post = await prisma.post.findFirst({
-      where: { 
-        id: postId, 
-        shopId 
+      where: {
+        id: postId,
+        shopId // ✅ Vérification isolation shop
       },
       include: {
         author: {
@@ -305,11 +297,11 @@ export async function DELETE(
       );
     }
 
-    // Vérifier les permissions de suppression
-    const canDelete = 
-      userRole === 'ADMIN' ||                           // Admin peut tout supprimer
-      userRole === 'MODERATOR' ||                       // Modérateur peut tout supprimer
-      post.author.id === userId;                        // Auteur peut supprimer ses posts
+    // ✅ SÉCURITÉ: Vérifier les permissions de suppression avec l'utilisateur authentifié
+    const canDelete =
+      user.role === 'ADMIN' ||                    // Admin peut tout supprimer
+      user.role === 'MODERATOR' ||                // Modérateur peut tout supprimer
+      post.author.id === user.id;                 // Auteur peut supprimer ses posts
 
     if (!canDelete) {
       return NextResponse.json(
@@ -323,13 +315,22 @@ export async function DELETE(
       where: { id: postId }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Post supprimé avec succès"
     });
 
   } catch (error) {
     console.error("Error deleting post:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to delete post" },
       { status: 500 }

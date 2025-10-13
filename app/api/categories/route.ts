@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { requireAuthAdmin } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
@@ -36,36 +37,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await requireAuthAdmin();
     ensureShopIsolation(shopId);
 
     const body = await request.json();
-    
-    // Récupérer ou utiliser l'utilisateur admin par défaut de cette boutique
-    let userId = body.userId;
-    
-    if (!userId) {
-      // Trouver un admin dans cette boutique comme fallback
-      const adminUser = await prisma.user.findFirst({
-        where: {
-          shopId,
-          role: "ADMIN"
-        }
-      });
-      
-      if (!adminUser) {
-        return NextResponse.json(
-          { error: "No admin user found in this shop" },
-          { status: 403 }
-        );
-      }
-      
-      userId = adminUser.id;
-    }
-    
-    // Vérifier les droits admin dans cette boutique
-    await requireAdmin(userId, shopId);
     const { name, color, description, order } = body;
 
     if (!name || !color) {
@@ -88,14 +64,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
     console.error("Error creating category:", error);
-    
-    if (error instanceof Error && error.message.includes("Unauthorized")) {
-      return NextResponse.json(
-        { error: "Seuls les administrateurs peuvent créer des catégories" },
-        { status: 403 }
-      );
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error) {
+      if (error.message === 'Not authenticated') {
+        return NextResponse.json(
+          { error: "Authentication required" },
+          { status: 401 }
+        );
+      }
+      if (error.message === 'Admin access required') {
+        return NextResponse.json(
+          { error: "Seuls les administrateurs peuvent créer des catégories" },
+          { status: 403 }
+        );
+      }
     }
-    
+
     return NextResponse.json(
       { error: "Failed to create category" },
       { status: 500 }

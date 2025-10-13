@@ -5,6 +5,7 @@ import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
 import { updateOnboardingTask } from "@/lib/onboarding";
+import { getAuthContext } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
@@ -58,20 +59,23 @@ export async function POST(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const { postId } = await params;
     const body = await request.json();
-    const { type, userId } = body;
+    const { type } = body;
 
-    if (!type || !userId) {
+    if (!type) {
       return NextResponse.json(
-        { error: "Type and userId are required" },
+        { error: "Type is required" },
         { status: 400 }
       );
     }
+
+    // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
+    const userId = user.id;
 
     // Vérifier si l'user a déjà réagi à ce post (dans cette boutique)
     const existingReaction = await prisma.reaction.findFirst({
@@ -141,6 +145,15 @@ export async function POST(
     }
   } catch (error) {
     console.error("Error managing reaction:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to manage reaction" },
       { status: 500 }

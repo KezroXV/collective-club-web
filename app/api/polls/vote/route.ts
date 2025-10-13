@@ -1,24 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { getAuthContext } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const body = await request.json();
-    const { pollId, optionId, userId } = body;
+    const { pollId, optionId } = body;
 
-    if (!pollId || !optionId || !userId) {
+    if (!pollId || !optionId) {
       return NextResponse.json(
-        { error: "pollId, optionId, and userId are required" },
+        { error: "pollId and optionId are required" },
         { status: 400 }
       );
     }
+
+    // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
+    const userId = user.id;
 
     // Vérifier si l'utilisateur a déjà voté (dans cette boutique)
     const existingVote = await prisma.pollVote.findUnique({
@@ -55,6 +59,15 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("Error voting:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json({ error: "Failed to vote" }, { status: 500 });
   }
 }
@@ -98,19 +111,22 @@ export async function GET(request: NextRequest) {
 // Supprimer le vote de l'utilisateur (toggle off, isolé par boutique)
 export async function DELETE(request: NextRequest) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const body = await request.json();
-    const { pollId, userId } = body;
+    const { pollId } = body;
 
-    if (!pollId || !userId) {
+    if (!pollId) {
       return NextResponse.json(
-        { error: "pollId and userId are required" },
+        { error: "pollId is required" },
         { status: 400 }
       );
     }
+
+    // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
+    const userId = user.id;
 
     const existingVote = await prisma.pollVote.findFirst({
       where: {
@@ -128,6 +144,15 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Error deleting vote:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to delete vote" },
       { status: 500 }

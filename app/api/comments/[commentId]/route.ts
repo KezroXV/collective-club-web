@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { getAuthContext } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
@@ -10,26 +11,17 @@ export async function DELETE(
   { params }: { params: Promise<{ commentId: string }> }
 ) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const { commentId } = await params;
-    const body = await request.json();
-    const { userId, userRole } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
 
     // Récupérer le commentaire avec ses informations
     const comment = await prisma.comment.findFirst({
-      where: { 
-        id: commentId, 
-        shopId 
+      where: {
+        id: commentId,
+        shopId
       },
       include: {
         author: {
@@ -45,11 +37,11 @@ export async function DELETE(
       );
     }
 
-    // Vérifier les permissions de suppression
-    const canDelete = 
-      comment.author.id === userId || // L'auteur peut supprimer son propre commentaire
-      userRole === 'ADMIN' ||        // Les admins peuvent tout supprimer
-      userRole === 'MODERATOR';      // Les modérateurs peuvent tout supprimer
+    // ✅ SÉCURITÉ: Vérifier les permissions de suppression avec l'utilisateur authentifié
+    const canDelete =
+      comment.author.id === user.id ||  // L'auteur peut supprimer son propre commentaire
+      user.role === 'ADMIN' ||          // Les admins peuvent tout supprimer
+      user.role === 'MODERATOR';        // Les modérateurs peuvent tout supprimer
 
     if (!canDelete) {
       return NextResponse.json(
@@ -95,13 +87,22 @@ export async function DELETE(
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      message: "Comment deleted successfully" 
+    return NextResponse.json({
+      success: true,
+      message: "Comment deleted successfully"
     });
 
   } catch (error) {
     console.error("Error deleting comment:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to delete comment" },
       { status: 500 }

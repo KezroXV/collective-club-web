@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { getAuthContext } from "@/lib/auth-context";
 
 const prisma = new PrismaClient();
 
@@ -11,28 +12,19 @@ export async function POST(
 ) {
   try {
     console.log('BAN API POST: Starting request');
-    
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user: currentUser, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
-    console.log('BAN API POST: ShopId obtained', { shopId });
+    console.log('BAN API POST: Authenticated user', { userId: currentUser.id, role: currentUser.role, shopId });
 
     const { userId: targetUserId } = await params;
-    const body = await request.json();
-    const { userId: currentUserId, userRole } = body;
-    
-    console.log('BAN API POST: Request data', { targetUserId, currentUserId, userRole });
 
-    if (!currentUserId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
+    console.log('BAN API POST: Request data', { targetUserId, currentUserId: currentUser.id, userRole: currentUser.role });
 
-    // Vérifier les permissions - seulement Admin et Modérateur peuvent bannir
-    if (!['ADMIN', 'MODERATOR'].includes(userRole)) {
-      console.log('BAN API POST: Permission denied', { userRole });
+    // ✅ SÉCURITÉ: Vérifier les permissions depuis la session
+    if (!['ADMIN', 'MODERATOR'].includes(currentUser.role)) {
+      console.log('BAN API POST: Permission denied', { userRole: currentUser.role });
       return NextResponse.json(
         { error: "Seuls les administrateurs et modérateurs peuvent bannir des utilisateurs" },
         { status: 403 }
@@ -43,9 +35,9 @@ export async function POST(
 
     // Vérifier que l'utilisateur cible existe et appartient à la bonne boutique
     const targetUser = await prisma.user.findFirst({
-      where: { 
-        id: targetUserId, 
-        shopId 
+      where: {
+        id: targetUserId,
+        shopId
       }
     });
 
@@ -78,24 +70,33 @@ export async function POST(
 
     console.log('BAN API POST: User found', { isBanned: targetUser.isBanned });
 
-    // Bannir l'utilisateur
+    // ✅ SÉCURITÉ: Bannir l'utilisateur avec l'ID de l'utilisateur authentifié
     const updatedUser = await prisma.user.update({
       where: { id: targetUserId },
-      data: { 
+      data: {
         isBanned: true,
         bannedAt: new Date(),
-        bannedBy: currentUserId
+        bannedBy: currentUser.id
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Utilisateur banni avec succès",
       user: updatedUser
     });
 
   } catch (error) {
     console.error("Error banning user:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to ban user" },
       { status: 500 }
@@ -109,23 +110,14 @@ export async function DELETE(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    // 🏪 ISOLATION MULTI-TENANT
-    const shopId = await getShopId(request);
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
+    const { user: currentUser, shopId } = await getAuthContext();
     ensureShopIsolation(shopId);
 
     const { userId: targetUserId } = await params;
-    const body = await request.json();
-    const { userId: currentUserId, userRole } = body;
 
-    if (!currentUserId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier les permissions - seulement Admin et Modérateur peuvent débannir
-    if (!['ADMIN', 'MODERATOR'].includes(userRole)) {
+    // ✅ SÉCURITÉ: Vérifier les permissions depuis la session
+    if (!['ADMIN', 'MODERATOR'].includes(currentUser.role)) {
       return NextResponse.json(
         { error: "Seuls les administrateurs et modérateurs peuvent débannir des utilisateurs" },
         { status: 403 }
@@ -134,9 +126,9 @@ export async function DELETE(
 
     // Vérifier que l'utilisateur cible existe et appartient à la bonne boutique
     const targetUser = await prisma.user.findFirst({
-      where: { 
-        id: targetUserId, 
-        shopId 
+      where: {
+        id: targetUserId,
+        shopId
       }
     });
 
@@ -158,21 +150,30 @@ export async function DELETE(
     // Débannir l'utilisateur
     const updatedUser = await prisma.user.update({
       where: { id: targetUserId },
-      data: { 
+      data: {
         isBanned: false,
         bannedAt: null,
         bannedBy: null
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: "Utilisateur débanni avec succès",
       user: updatedUser
     });
 
   } catch (error) {
     console.error("Error unbanning user:", error);
+
+    // ✅ SÉCURITÉ: Gestion d'erreur d'authentification
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Failed to unban user" },
       { status: 500 }
