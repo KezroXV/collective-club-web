@@ -381,7 +381,12 @@ const PostHeader = ({
           {post?.isPinned && (
             <Badge
               variant="secondary"
-              className="flex items-center gap-1 sm:gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors px-1.5 py-0.5 sm:px-2.5 sm:py-1"
+              className="flex items-center gap-1 sm:gap-1.5 transition-colors px-1.5 py-0.5 sm:px-2.5 sm:py-1"
+              style={{
+                backgroundColor: `${colors.Posts}15`,
+                color: colors.Posts,
+                border: `1px solid ${colors.Posts}30`
+              }}
             >
               <Pin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
               <span className="text-[9px] sm:text-[10px] font-semibold whitespace-nowrap">

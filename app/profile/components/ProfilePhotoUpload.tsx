@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface User {
   id: string;
@@ -28,6 +29,8 @@ export default function ProfilePhotoUpload({
   imagePreview,
   setImagePreview,
 }: ProfilePhotoUploadProps) {
+  const { colors } = useTheme();
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -54,17 +57,23 @@ export default function ProfilePhotoUpload({
       <Label>Photo de profil</Label>
       <div className="flex items-center gap-4">
         <div className="relative">
-          <Avatar 
-            className="h-20 w-20 cursor-pointer hover:opacity-80 transition-opacity" 
+          <Avatar
+            className="h-20 w-20 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => document.getElementById('profile-image-input')?.click()}
           >
             <AvatarImage src={imagePreview || currentUser.image || "/pdp.svg"} />
-            <AvatarFallback className="bg-blue-500 text-white font-semibold text-xl">
+            <AvatarFallback
+              className="text-white font-semibold text-xl"
+              style={{ backgroundColor: colors.Posts }}
+            >
               {getInitials(currentUser.name || "")}
             </AvatarFallback>
           </Avatar>
           {isEditing && (
-            <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full p-1.5 shadow-md">
+            <div
+              className="absolute -bottom-1 -right-1 text-white rounded-full p-1.5 shadow-md"
+              style={{ backgroundColor: colors.Posts }}
+            >
               <Camera className="h-3 w-3" />
             </div>
           )}

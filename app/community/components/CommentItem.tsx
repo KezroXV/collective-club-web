@@ -312,14 +312,21 @@ const CommentItem = ({
                             }}
                             className={`p-2 rounded transition-colors text-lg relative ${
                               isSelected
-                                ? "bg-blue-100 border-2 border-blue-300"
+                                ? "border-2"
                                 : "hover:bg-gray-100"
                             }`}
+                            style={isSelected ? {
+                              backgroundColor: `${colors.Posts}15`,
+                              borderColor: colors.Posts
+                            } : {}}
                             title={type}
                           >
                             {emoji}
                             {isSelected && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-white" />
+                              <div
+                                className="absolute -top-1 -right-1 w-3 h-3 rounded-full border border-white"
+                                style={{ backgroundColor: colors.Posts }}
+                              />
                             )}
                           </button>
                           {reactionCount > 0 && (
@@ -356,7 +363,17 @@ const CommentItem = ({
             {/* Bouton répondre séparé quand les réponses sont visibles */}
             {!isReply && currentUser && showReplies && repliesCount > 0 && (
               <button
-                className="flex items-center gap-2 text-xs font-medium text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-3 py-2 rounded-full transition-all duration-200"
+                className="flex items-center gap-2 text-xs font-medium px-3 py-2 rounded-full transition-all duration-200"
+                style={{
+                  color: colors.Posts,
+                  backgroundColor: `${colors.Posts}10`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.Posts}20`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `${colors.Posts}10`;
+                }}
                 onClick={() => setShowReplyForm(!showReplyForm)}
               >
                 <MessageCircle className="h-4 w-4" />

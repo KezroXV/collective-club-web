@@ -365,7 +365,12 @@ export default function PostCard({
             {post.isPinned && (
               <Badge
                 variant="secondary"
-                className="flex items-center gap-1 sm:gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors px-1.5 py-0.5 sm:px-2.5 sm:py-1"
+                className="flex items-center gap-1 sm:gap-1.5 transition-colors px-1.5 py-0.5 sm:px-2.5 sm:py-1"
+                style={{
+                  backgroundColor: `${colors.Posts}15`,
+                  color: colors.Posts,
+                  border: `1px solid ${colors.Posts}30`
+                }}
               >
                 <Pin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                 <span className="text-[9px] sm:text-[10px] font-semibold whitespace-nowrap">
@@ -476,14 +481,21 @@ export default function PostCard({
                         }}
                         className={`p-2 rounded transition-colors text-lg relative ${
                           isSelected
-                            ? "bg-blue-100 border-2 border-blue-300"
+                            ? "border-2"
                             : "hover:bg-gray-100"
                         }`}
+                        style={isSelected ? {
+                          backgroundColor: `${colors.Posts}15`,
+                          borderColor: colors.Posts
+                        } : {}}
                         title={type}
                       >
                         {emoji}
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-white" />
+                          <div
+                            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border border-white"
+                            style={{ backgroundColor: colors.Posts }}
+                          />
                         )}
                       </button>
                       <span className="text-xs text-gray-500 mt-1">

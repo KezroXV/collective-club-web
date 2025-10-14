@@ -88,14 +88,21 @@ const PostActions = ({
                         }}
                         className={`p-2 rounded transition-colors text-lg relative ${
                           isSelected
-                            ? "bg-blue-100 border-2 border-blue-300"
+                            ? "border-2"
                             : "hover:bg-gray-100"
                         }`}
+                        style={isSelected ? {
+                          backgroundColor: `${colors.Posts}15`,
+                          borderColor: colors.Posts
+                        } : {}}
                         title={type}
                       >
                         {emoji}
                         {isSelected && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-white" />
+                          <div
+                            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border border-white"
+                            style={{ backgroundColor: colors.Posts }}
+                          />
                         )}
                       </button>
                       {reactionCount > 0 && (
