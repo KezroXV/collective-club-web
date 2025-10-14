@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 import { usePermissions } from "@/lib/hooks/usePermissions";
