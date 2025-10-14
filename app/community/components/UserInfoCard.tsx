@@ -39,7 +39,7 @@ export default function UserInfoCard({ user }: UserInfoCardProps) {
               className="h-9 w-9 sm:h-10 sm:w-10 border-2 flex-shrink-0"
               style={{ borderColor: colors.Posts }}
             >
-              <AvatarImage src={user.image} />
+              <AvatarImage src={user.image || "/pdp.svg"} />
               <AvatarFallback
                 className="text-white font-semibold text-xs sm:text-sm"
                 style={{ backgroundColor: colors.Posts }}

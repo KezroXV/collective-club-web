@@ -221,7 +221,7 @@ function HeaderContent() {
                       style={{ borderColor: colors.Posts }}
                     >
                       <AvatarImage
-                        src={currentUser.image || undefined}
+                        src={currentUser.image || "/pdp.svg"}
                         alt={currentUser.name || "Photo de profil"}
                       />
                       <AvatarFallback
@@ -313,7 +313,7 @@ function HeaderContent() {
                         style={{ borderColor: colors.Posts }}
                       >
                         <AvatarImage
-                          src={currentUser.image || undefined}
+                          src={currentUser.image || "/pdp.svg"}
                           alt={currentUser.name || "Photo"}
                         />
                         <AvatarFallback

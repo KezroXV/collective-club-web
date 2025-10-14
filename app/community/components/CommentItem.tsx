@@ -223,7 +223,7 @@ const CommentItem = ({
     >
       <div className="flex gap-4">
         <Avatar className="h-10 w-10 flex-shrink-0">
-          <AvatarImage src={comment.author.image || undefined} />
+          <AvatarImage src={comment.author.image || "/pdp.svg"} />
           <AvatarFallback
             className="text-sm text-white"
             style={{ backgroundColor: colors.Posts }}

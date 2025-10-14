@@ -254,7 +254,7 @@ const PostHeader = ({
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
-            <AvatarImage src={author.image} />
+            <AvatarImage src={author.image || "/pdp.svg"} />
             <AvatarFallback
               className="text-white font-semibold text-xs sm:text-sm"
               style={{ backgroundColor: colors.Posts }}

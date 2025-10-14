@@ -58,7 +58,7 @@ export default function ProfilePhotoUpload({
             className="h-20 w-20 cursor-pointer hover:opacity-80 transition-opacity" 
             onClick={() => document.getElementById('profile-image-input')?.click()}
           >
-            <AvatarImage src={imagePreview || currentUser.image || undefined} />
+            <AvatarImage src={imagePreview || currentUser.image || "/pdp.svg"} />
             <AvatarFallback className="bg-blue-500 text-white font-semibold text-xl">
               {getInitials(currentUser.name || "")}
             </AvatarFallback>

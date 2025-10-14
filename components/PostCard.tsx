@@ -318,7 +318,7 @@ export default function PostCard({
         <div className="flex items-start justify-between pt-3 sm:pt-6 mb-3 gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <Avatar className="h-7 w-7 sm:h-9 sm:w-9 flex-shrink-0">
-              <AvatarImage src={post.author.image || undefined} />
+              <AvatarImage src={post.author.image || "/pdp.svg"} />
               <AvatarFallback
                 className="text-[10px] sm:text-xs font-semibold text-white"
                 style={{ backgroundColor: colors.Posts }}

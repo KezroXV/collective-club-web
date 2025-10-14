@@ -124,7 +124,7 @@ export default function RolesSection() {
             >
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} />
+                  <AvatarImage src={user.avatar || "/pdp.svg"} />
                   <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
                     {getInitials(user.name)}
                   </AvatarFallback>

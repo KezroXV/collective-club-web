@@ -199,7 +199,7 @@ const AuthorSidebar = ({
         <div className={`p-6 ${currentUser && currentUser.id !== author.id ? 'flex gap-4' : ''}`}>
           <div className="flex items-center gap-3 mb-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={author.image} />
+              <AvatarImage src={author.image || "/pdp.svg"} />
               <AvatarFallback className="text-white font-semibold text-lg" style={{ backgroundColor: colors.Posts }}>
                 {getInitials(author.name)}
               </AvatarFallback>
