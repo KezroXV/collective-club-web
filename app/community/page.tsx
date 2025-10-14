@@ -132,6 +132,7 @@ function CommunityPageContent() {
                 variant="outline"
                 size="sm"
                 className="h-8 sm:h-9 px-2 sm:px-3"
+                neutralHover={true}
               >
                 <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="text-xs sm:text-sm">Retour</span>

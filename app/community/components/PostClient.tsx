@@ -472,6 +472,7 @@ const PostClient = () => {
               <Button
                 variant="outline"
                 className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-sm"
+                neutralHover={true}
               >
                 <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Retour</span>
@@ -484,10 +485,9 @@ const PostClient = () => {
             {/* Colonne principale (66%) */}
             <div className="lg:col-span-2">
               <Card
-                className="hover:shadow-sm"
+                className="hover:shadow-sm transition-shadow bg-white"
                 style={{
                   border: `1px solid ${colors.Bordures}`,
-                  backgroundColor: colors.Posts,
                 }}
               >
                 <CardHeader className="">

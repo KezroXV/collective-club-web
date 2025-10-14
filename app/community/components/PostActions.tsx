@@ -132,6 +132,7 @@ const PostActions = ({
         size="sm"
         className="gap-2 text-gray-600 hover:text-gray-900"
         onClick={onShare}
+        neutralHover={true}
       >
         <Share2 className="h-4 w-4" />
       </Button>

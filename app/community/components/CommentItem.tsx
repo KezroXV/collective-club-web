@@ -421,6 +421,7 @@ const CommentItem = ({
                       variant="outline"
                       onClick={() => setShowDeleteDialog(false)}
                       disabled={deleting}
+                      neutralHover={true}
                     >
                       Annuler
                     </Button>

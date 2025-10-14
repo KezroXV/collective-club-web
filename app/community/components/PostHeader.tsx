@@ -303,6 +303,7 @@ const PostHeader = ({
                 variant="ghost"
                 size="sm"
                 className="h-8 w-8 sm:h-9 sm:w-9 p-0"
+                neutralHover={true}
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -413,6 +414,7 @@ const PostHeader = ({
               variant="outline"
               onClick={() => setShowDeleteDialog(false)}
               disabled={isDeleting}
+              neutralHover={true}
             >
               Annuler
             </Button>

@@ -324,4 +324,13 @@
       @apply gap-6; /* Reduced gap on mobile */
     }
   }
+
+  /* Theme-aware button hover states for community */
+  .theme-button-hover {
+    @apply hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  .theme-button-outline-hover {
+    @apply hover:bg-transparent hover:border-gray-300;
+  }
 }

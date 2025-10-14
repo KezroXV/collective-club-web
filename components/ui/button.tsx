@@ -40,6 +40,7 @@ interface ButtonProps extends React.ComponentProps<"button">, VariantProps<typeo
   asChild?: boolean
   loading?: boolean
   icon?: React.ReactNode
+  neutralHover?: boolean // Pour désactiver les hovers bleus (communauté)
 }
 
 function Button({
@@ -51,10 +52,20 @@ function Button({
   icon,
   children,
   disabled,
+  neutralHover = false,
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button"
   const isDisabled = disabled || loading
+
+  // Classes pour neutraliser le hover bleu dans la communauté
+  const neutralHoverClasses = neutralHover
+    ? variant === "outline"
+      ? "hover:!bg-gray-50 hover:!text-gray-900 hover:!border-gray-300"
+      : variant === "ghost"
+      ? "hover:!bg-gray-100 hover:!text-gray-900"
+      : ""
+    : ""
 
   return (
     <Comp
@@ -62,6 +73,7 @@ function Button({
       className={cn(
         buttonVariants({ variant, size }),
         loading && "animate-pulse cursor-not-allowed",
+        neutralHoverClasses,
         className
       )}
       disabled={isDisabled}
