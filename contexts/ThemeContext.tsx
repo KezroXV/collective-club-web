@@ -22,11 +22,13 @@ interface ThemeContextType {
   selectedFont: string;
   coverImageUrl: string | null;
   bannerImageUrl: string;
+  logoImageUrl: string | null;
   updateTheme: (
     colors: ThemeColors,
     font: string,
     coverImage?: string | null,
-    bannerImage?: string
+    bannerImage?: string,
+    logoImage?: string | null
   ) => void;
   loadUserTheme: (userId: string) => Promise<void>;
 }
@@ -46,13 +48,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [selectedFont, setSelectedFont] = useState("Helvetica");
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [bannerImageUrl, setBannerImageUrl] = useState<string>("/Bannière.svg");
+  const [logoImageUrl, setLogoImageUrl] = useState<string | null>(null);
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
   const updateTheme = (
     newColors: ThemeColors,
     font: string,
     coverImage?: string | null,
-    bannerImage?: string
+    bannerImage?: string,
+    logoImage?: string | null
   ) => {
     setColors(newColors);
     setSelectedFont(font);
@@ -62,6 +66,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (bannerImage !== undefined) {
       setBannerImageUrl(bannerImage);
     }
+    if (logoImage !== undefined) {
+      setLogoImageUrl(logoImage);
+    }
 
     // Sauvegarder dans localStorage
     if (session?.user?.id) {
@@ -70,6 +77,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         selectedFont: font,
         coverImageUrl: coverImage !== undefined ? coverImage : coverImageUrl,
         bannerImageUrl: bannerImage !== undefined ? bannerImage : bannerImageUrl,
+        logoImageUrl: logoImage !== undefined ? logoImage : logoImageUrl,
       };
       localStorage.setItem(`theme_${session.user.id}`, JSON.stringify(themeData));
     }
@@ -91,6 +99,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setSelectedFont(settings.selectedFont);
         setCoverImageUrl(settings.coverImageUrl);
         setBannerImageUrl(settings.bannerImageUrl || "/Bannière.svg");
+        setLogoImageUrl(settings.logoImageUrl || null);
 
         // Sauvegarder dans localStorage après chargement depuis l'API
         const themeData = {
@@ -98,6 +107,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           selectedFont: settings.selectedFont,
           coverImageUrl: settings.coverImageUrl,
           bannerImageUrl: settings.bannerImageUrl || "/Bannière.svg",
+          logoImageUrl: settings.logoImageUrl || null,
         };
         localStorage.setItem(`theme_${userId}`, JSON.stringify(themeData));
       }
@@ -119,6 +129,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
           setSelectedFont(themeData.selectedFont);
           setCoverImageUrl(themeData.coverImageUrl);
           setBannerImageUrl(themeData.bannerImageUrl);
+          setLogoImageUrl(themeData.logoImageUrl || null);
           setIsThemeLoaded(true);
         } catch (error) {
           console.error("Erreur parsing localStorage theme:", error);
@@ -143,6 +154,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setSelectedFont("Helvetica");
       setCoverImageUrl(null);
       setBannerImageUrl("/Bannière.svg");
+      setLogoImageUrl(null);
     }
   }, [session?.user?.id]);
 
@@ -153,6 +165,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         selectedFont,
         coverImageUrl,
         bannerImageUrl,
+        logoImageUrl,
         updateTheme,
         loadUserTheme,
       }}

@@ -324,7 +324,10 @@ model CustomizationSettings {
   
   // Image de bannière
   bannerImageUrl String @default("/Bannière.svg")
-  
+
+  // Image de logo
+  logoImageUrl String?
+
   // Badges personnalisés (JSON)
   customBadges  Json?
   

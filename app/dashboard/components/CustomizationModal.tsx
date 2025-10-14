@@ -43,6 +43,7 @@ export default function CustomizationModal({
     colors: globalColors,
     selectedFont: globalFont,
     bannerImageUrl: globalBannerImage,
+    logoImageUrl: globalLogoImage,
     updateTheme,
   } = useTheme();
 
@@ -52,6 +53,9 @@ export default function CustomizationModal({
   const [bannerImage, setBannerImage] = useState(
     globalBannerImage || "/Bannière.svg"
   );
+  const [logoImage, setLogoImage] = useState<string | null>(
+    globalLogoImage || null
+  );
   const [isAddBadgeModalOpen, setIsAddBadgeModalOpen] = useState(false);
   const [isEditBadgeModalOpen, setIsEditBadgeModalOpen] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState<any>(null);
@@ -60,6 +64,7 @@ export default function CustomizationModal({
   const [isLoadingBadges, setIsLoadingBadges] = useState(false);
 
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // Charger les badges
   const loadBadges = useCallback(async () => {
@@ -113,9 +118,10 @@ export default function CustomizationModal({
       setColors(globalColors);
       setSelectedFont(globalFont);
       setBannerImage(globalBannerImage || "/Bannière.svg");
+      setLogoImage(globalLogoImage || null);
       loadBadges();
     }
-  }, [isOpen, globalColors, globalFont, globalBannerImage, loadBadges]);
+  }, [isOpen, globalColors, globalFont, globalBannerImage, globalLogoImage, loadBadges]);
 
   const handleColorChange = (color: string) => {
     setColors((prev) => ({
@@ -135,6 +141,17 @@ export default function CustomizationModal({
     }
   };
 
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setLogoImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleReset = () => {
     const defaultColors = {
       Posts: "#3B82F6",
@@ -146,6 +163,7 @@ export default function CustomizationModal({
     setColors(defaultColors);
     setSelectedFont("Helvetica");
     setBannerImage("/Bannière.svg");
+    setLogoImage(null);
 
     toast.success("Paramètres remis par défaut !");
   };
@@ -172,12 +190,13 @@ export default function CustomizationModal({
           selectedFont,
           coverImageUrl: null,
           bannerImageUrl: bannerImage,
+          logoImageUrl: logoImage,
         }),
       });
 
       if (response.ok) {
         // Mettre à jour le contexte global
-        updateTheme(colors, selectedFont, null, bannerImage);
+        updateTheme(colors, selectedFont, null, bannerImage, logoImage);
         toast.success("Personnalisation enregistrée !");
         onClose();
       } else {
@@ -263,6 +282,57 @@ export default function CustomizationModal({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Section Logo du forum */}
+              <div>
+                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+                    Logo du forum
+                  </h3>
+                  <Button
+                    onClick={() => logoInputRef.current?.click()}
+                    variant="outline"
+                    size="sm"
+                    className="text-gray-600 hover:text-gray-700 h-8 text-xs"
+                  >
+                    <Upload className="h-3 w-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                    {logoImage ? "Changer" : "Ajouter"}
+                  </Button>
+                </div>
+
+                <div className="relative flex items-center justify-center">
+                  {logoImage ? (
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                      <Image
+                        src={logoImage}
+                        alt="Logo"
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-cover rounded-xl border border-chart-4"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center"
+                      style={{
+                        background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
+                      }}
+                    >
+                      <span className="text-white font-bold text-3xl sm:text-4xl">
+                        ?
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
               </div>
 
               {/* Section Bannière */}

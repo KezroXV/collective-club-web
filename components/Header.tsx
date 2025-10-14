@@ -31,7 +31,7 @@ import {
 function HeaderContent() {
   const { currentUser } = useCurrentUser();
   const { canManageShop, isModerator } = usePermissions();
-  const { colors: themeColors } = useTheme();
+  const { colors: themeColors, logoImageUrl } = useTheme();
   const currentShop = useCurrentShop();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -148,16 +148,28 @@ function HeaderContent() {
         <div className="flex justify-between items-center h-16 sm:h-[72px]">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div
-              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
-              style={{
-                background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
-              }}
-            >
-              <span className="text-white font-bold text-lg sm:text-xl">
-                {getShopName().charAt(0).toUpperCase()}
-              </span>
-            </div>
+            {logoImageUrl ? (
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden transition-transform duration-300 group-hover:scale-105">
+                <Image
+                  src={logoImageUrl}
+                  alt={getShopName()}
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
+                }}
+              >
+                <span className="text-white font-bold text-lg sm:text-xl">
+                  {getShopName().charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
             <div className="flex flex-col">
               <span
                 className="font-bold text-base sm:text-lg leading-tight"

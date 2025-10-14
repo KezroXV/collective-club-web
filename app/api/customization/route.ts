@@ -133,6 +133,7 @@ export async function PUT(request: NextRequest) {
       selectedFont,
       coverImageUrl,
       bannerImageUrl,
+      logoImageUrl,
       customBadges,
     } = body;
 
@@ -147,11 +148,12 @@ export async function PUT(request: NextRequest) {
       update: {
         colorPosts: colorPosts || "#3B82F6",
         colorBorders: colorBorders || "#E5E7EB",
-        colorBg: colorBg || "#F9FAFB", 
+        colorBg: colorBg || "#F9FAFB",
         colorText: colorText || "#111827",
         selectedFont: selectedFont || "Helvetica",
         coverImageUrl: coverImageUrl || null,
         bannerImageUrl: bannerImageUrl || "/Bannière.svg",
+        logoImageUrl: logoImageUrl !== undefined ? logoImageUrl : undefined,
         customBadges: customBadges || null,
       },
       create: {
@@ -160,10 +162,11 @@ export async function PUT(request: NextRequest) {
         colorPosts: colorPosts || "#3B82F6",
         colorBorders: colorBorders || "#E5E7EB",
         colorBg: colorBg || "#F9FAFB",
-        colorText: colorText || "#111827", 
+        colorText: colorText || "#111827",
         selectedFont: selectedFont || "Helvetica",
         coverImageUrl: coverImageUrl || null,
         bannerImageUrl: bannerImageUrl || "/Bannière.svg",
+        logoImageUrl: logoImageUrl || null,
         customBadges: customBadges || null,
       },
     });
