@@ -10,6 +10,7 @@ import DashboardHeader from "./components/DashboardHeader";
 import ManagementSection from "./components/ManagementSection";
 import ShopManagementSection from "./components/ShopManagementSection";
 import ModalsManager from "./components/ModalsManager";
+import DashboardWrapper from "./components/DashboardWrapper";
 
 function DashboardPageContent() {
   const { currentUser, loading } = useCurrentUser();
@@ -134,47 +135,47 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-        <DashboardHeader shopId={shopId} borderColor="#E5E7EB" />
+    <DashboardWrapper>
+      <div className="min-h-screen bg-gray-50 p-3 sm:p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+          <DashboardHeader shopId={shopId} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
-          <ManagementSection
-            onClientsClick={handleClientsClick}
-            onPostsClick={handlePostsClick}
-            onCategoriesClick={handleCategoriesClick}
-            onThemeClick={handleThemeClick}
-            shopId={shopId}
-            refreshTrigger={refreshTrigger}
-            borderColor="#E5E7EB"
-          />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+            <ManagementSection
+              onClientsClick={handleClientsClick}
+              onPostsClick={handlePostsClick}
+              onCategoriesClick={handleCategoriesClick}
+              onThemeClick={handleThemeClick}
+              shopId={shopId}
+              refreshTrigger={refreshTrigger}
+            />
 
-          <ShopManagementSection
+            <ShopManagementSection
+              userId={currentUser?.id}
+              shopId={shopId}
+              onThemeClick={handleThemeClick}
+            />
+          </div>
+
+          <ModalsManager
+            showPostsModal={showPostsModal}
+            showClientsModal={showClientsModal}
+            showCustomization={showCustomization}
+            showThemeModal={showThemeModal}
+            showCategoriesModal={showCategoriesModal}
             userId={currentUser?.id}
             shopId={shopId}
-            onThemeClick={handleThemeClick}
-            borderColor="#E5E7EB"
+            userRole={currentUser?.role}
+            onClosePostsModal={() => setShowPostsModal(false)}
+            onCloseClientsModal={() => setShowClientsModal(false)}
+            onCloseCustomizationModal={handleCloseCustomizationModal}
+            onCloseCategoriesModal={() => setShowCategoriesModal(false)}
+            onPostDeleted={handlePostDeleted}
+            onCategoryCreated={handleCategoryCreated}
           />
         </div>
-
-        <ModalsManager
-          showPostsModal={showPostsModal}
-          showClientsModal={showClientsModal}
-          showCustomization={showCustomization}
-          showThemeModal={showThemeModal}
-          showCategoriesModal={showCategoriesModal}
-          userId={currentUser?.id}
-          shopId={shopId}
-          userRole={currentUser?.role}
-          onClosePostsModal={() => setShowPostsModal(false)}
-          onCloseClientsModal={() => setShowClientsModal(false)}
-          onCloseCustomizationModal={handleCloseCustomizationModal}
-          onCloseCategoriesModal={() => setShowCategoriesModal(false)}
-          onPostDeleted={handlePostDeleted}
-          onCategoryCreated={handleCategoryCreated}
-        />
       </div>
-    </div>
+    </DashboardWrapper>
   );
 }
 

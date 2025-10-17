@@ -24,7 +24,6 @@ interface StatCardProps {
   trend: "up" | "down";
   iconSrc: string;
   isLoading?: boolean;
-  borderColor?: string;
 }
 
 function StatCard({
@@ -34,8 +33,8 @@ function StatCard({
   trend,
   iconSrc,
   isLoading,
-  borderColor = "#E5E7EB",
 }: StatCardProps) {
+  const borderColor = "#E5E7EB";
   const [displayValue, setDisplayValue] = useState(0);
 
   // Animation du compteur au chargement
@@ -122,13 +121,12 @@ function StatCard({
 
 interface StatsCardsProps {
   shopId?: string;
-  borderColor?: string;
 }
 
 export default function StatsCards({
   shopId,
-  borderColor = "#E5E7EB",
 }: StatsCardsProps) {
+  const borderColor = "#E5E7EB";
   const [stats, setStats] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -201,7 +199,6 @@ export default function StatsCards({
         trend={stats?.posts.trend || "up"}
         iconSrc="/postIcon.svg"
         isLoading={isLoading}
-        borderColor={borderColor}
       />
 
       <StatCard
@@ -211,7 +208,6 @@ export default function StatsCards({
         trend={stats?.engagement.trend || "up"}
         iconSrc="/EngagementIcon.svg"
         isLoading={isLoading}
-        borderColor={borderColor}
       />
 
       <StatCard
@@ -221,7 +217,6 @@ export default function StatsCards({
         trend={stats?.members.trend || "up"}
         iconSrc="/FollowIcon.svg"
         isLoading={isLoading}
-        borderColor={borderColor}
       />
     </div>
   );

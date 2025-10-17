@@ -11,7 +11,6 @@ interface ManagementSectionProps {
   onThemeClick: () => void;
   shopId: string;
   refreshTrigger?: number;
-  borderColor?: string;
 }
 
 export default function ManagementSection({
@@ -21,8 +20,8 @@ export default function ManagementSection({
   onThemeClick,
   shopId,
   refreshTrigger,
-  borderColor = "#E5E7EB",
 }: ManagementSectionProps) {
+  const borderColor = "#E5E7EB";
   return (
     <div className="lg:col-span-8 space-y-4 sm:space-y-6">
       <Card className="hover:shadow-sm" style={{ borderColor }}>
@@ -66,7 +65,6 @@ export default function ManagementSection({
       <PopularPosts
         shopId={shopId}
         refreshTrigger={refreshTrigger}
-        borderColor={borderColor}
       />
     </div>
   );

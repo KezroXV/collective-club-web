@@ -13,14 +13,13 @@ interface Post {
 interface PopularPostsProps {
   shopId: string;
   refreshTrigger?: number; // Trigger pour forcer le refresh
-  borderColor?: string;
 }
 
 export default function PopularPosts({
   shopId,
   refreshTrigger,
-  borderColor = "#E5E7EB",
 }: PopularPostsProps) {
+  const borderColor = "#E5E7EB";
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

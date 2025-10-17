@@ -34,7 +34,6 @@ interface ShopManagementSectionProps {
   userId?: string;
   shopId: string;
   onThemeClick: () => void;
-  borderColor?: string;
 }
 
 interface User {
@@ -59,8 +58,8 @@ export default function ShopManagementSection({
   userId,
   shopId,
   onThemeClick,
-  borderColor = "#E5E7EB",
 }: ShopManagementSectionProps) {
+  const borderColor = "#E5E7EB";
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);

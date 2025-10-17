@@ -233,7 +233,7 @@ export default function CustomizationModal({
                 </h3>
 
                 <Tabs value={activeColorTab} onValueChange={setActiveColorTab}>
-                  <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10">
+                  <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10">
                     <TabsTrigger value="Posts" className="text-xs sm:text-sm">
                       Posts
                     </TabsTrigger>
@@ -242,9 +242,6 @@ export default function CustomizationModal({
                       className="text-xs sm:text-sm"
                     >
                       Bordures
-                    </TabsTrigger>
-                    <TabsTrigger value="Fond" className="text-xs sm:text-sm">
-                      Fond
                     </TabsTrigger>
                     <TabsTrigger value="Police" className="text-xs sm:text-sm">
                       Police
