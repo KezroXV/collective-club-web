@@ -26,6 +26,16 @@ function RequireAuthContent({
 
   useEffect(() => {
     if (!loading && !currentUser) {
+      // 🔄 Vérifier si on vient juste d'une tentative d'authentification
+      const lastAuthAttempt = sessionStorage.getItem('shopify_auth_attempt');
+      const now = Date.now();
+
+      // Si l'auth a été tentée il y a moins de 2 secondes, attendre encore un peu
+      if (lastAuthAttempt && (now - parseInt(lastAuthAttempt)) < 2000) {
+        console.log('⏳ Attente de la session après auth Shopify...');
+        return; // Ne pas rediriger immédiatement
+      }
+
       // Construire l'URL de redirection avec les paramètres actuels
       const currentUrl = window.location.href;
       const shopParam = searchParams.get('shop');

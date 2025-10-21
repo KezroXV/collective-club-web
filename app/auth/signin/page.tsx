@@ -36,10 +36,21 @@ function SignInContent() {
       const data = await response.json();
 
       if (data.success) {
-        // Rediriger vers le dashboard avec le shop param
-        const url = new URL(callbackUrl, window.location.origin);
-        url.searchParams.set("shop", shop);
-        router.push(url.pathname + url.search);
+        console.log("✅ Shopify auth success, redirecting in 800ms...");
+
+        // 📝 Marquer qu'une tentative d'auth vient d'avoir lieu (pour RequireAuth)
+        sessionStorage.setItem('shopify_auth_attempt', Date.now().toString());
+
+        // ⏱️ IMPORTANT: Attendre que la session soit complètement écrite avant de rediriger
+        // Cela évite la boucle infinie où RequireAuth ne détecte pas encore la session
+        setTimeout(() => {
+          // Rediriger vers le dashboard avec le shop param
+          const url = new URL(callbackUrl, window.location.origin);
+          url.searchParams.set("shop", shop);
+
+          // ✅ Utiliser window.location.href pour forcer un refresh complet et recharger la session
+          window.location.href = url.pathname + url.search;
+        }, 800);
       } else {
         console.error("Shopify auth failed:", data.error);
         setIsLoading(false);
