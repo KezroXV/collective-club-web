@@ -36,7 +36,7 @@ function SignInContent() {
       const data = await response.json();
 
       if (data.success) {
-        console.log("✅ Shopify auth success, redirecting in 800ms...");
+        console.log("✅ Shopify auth success, user role:", data.user.role);
 
         // 📝 Marquer qu'une tentative d'auth vient d'avoir lieu (pour RequireAuth)
         sessionStorage.setItem('shopify_auth_attempt', Date.now().toString());
@@ -44,8 +44,16 @@ function SignInContent() {
         // ⏱️ IMPORTANT: Attendre que la session soit complètement écrite avant de rediriger
         // Cela évite la boucle infinie où RequireAuth ne détecte pas encore la session
         setTimeout(() => {
-          // Rediriger vers le dashboard avec le shop param
-          const url = new URL(callbackUrl, window.location.origin);
+          // 🎯 ADMIN → toujours vers /dashboard, MEMBER → peut aller vers callbackUrl
+          let destination = callbackUrl;
+
+          // Si l'utilisateur est ADMIN, forcer la redirection vers /dashboard
+          if (data.user.role === "ADMIN" || data.user.isShopOwner) {
+            destination = "/dashboard";
+            console.log("👑 Admin détecté, redirection forcée vers /dashboard");
+          }
+
+          const url = new URL(destination, window.location.origin);
           url.searchParams.set("shop", shop);
 
           // ✅ Utiliser window.location.href pour forcer un refresh complet et recharger la session

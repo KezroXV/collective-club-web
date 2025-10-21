@@ -50,6 +50,22 @@ function RequireAuthContent({
 
       router.push(signInUrl.toString());
     }
+
+    // 👑 Si l'utilisateur est ADMIN et sur la page d'accueil, rediriger vers /dashboard
+    if (!loading && currentUser && (currentUser.role === 'ADMIN' || currentUser.isShopOwner)) {
+      const currentPath = window.location.pathname;
+      const shopParam = searchParams.get('shop');
+
+      // Si on est sur la page d'accueil ("/"), rediriger vers /dashboard
+      if (currentPath === '/') {
+        console.log('👑 Admin sur page d\'accueil, redirection vers /dashboard');
+        const dashboardUrl = new URL('/dashboard', window.location.origin);
+        if (shopParam) {
+          dashboardUrl.searchParams.set('shop', shopParam);
+        }
+        router.push(dashboardUrl.toString());
+      }
+    }
   }, [currentUser, loading, router, searchParams, redirectTo]);
 
   // 🔄 Afficher un loader pendant la vérification d'authentification
