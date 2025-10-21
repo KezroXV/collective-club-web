@@ -23,9 +23,13 @@ import {
   Edit,
   Trash2,
   Users,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
+import { useShopPersistence } from "@/lib/useShopPersistence";
 import ClientsModal from "./ClientsModal";
 import CustomRolesModal from "./CustomRolesModal";
 import Image from "next/image";
@@ -103,6 +107,11 @@ export default function ShopManagementSection({
     null
   );
   const [loadingDeleteCategory, setLoadingDeleteCategory] = useState(false);
+
+  // États pour la copie de l'URL du forum
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const searchParams = useSearchParams();
+  const { currentShop, addShopToUrl } = useShopPersistence();
 
   // Fonction pour récupérer les utilisateurs (admins et modérateurs)
   const fetchUsers = async () => {
@@ -293,6 +302,28 @@ export default function ShopManagementSection({
       toast.error("Erreur lors de la suppression");
     } finally {
       setLoadingDeleteCategory(false);
+    }
+  };
+
+  // Fonction pour copier l'URL du forum
+  const handleCopyForumUrl = async () => {
+    const shop = searchParams.get("shop") || currentShop;
+    const forumUrl = shop
+      ? `${window.location.origin}/?shop=${shop}`
+      : window.location.origin;
+
+    try {
+      await navigator.clipboard.writeText(forumUrl);
+      setCopiedUrl(true);
+      toast.success("URL du forum copiée !");
+
+      // Réinitialiser après 2 secondes
+      setTimeout(() => {
+        setCopiedUrl(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error copying URL:", error);
+      toast.error("Erreur lors de la copie de l'URL");
     }
   };
 
@@ -727,11 +758,31 @@ export default function ShopManagementSection({
           <Button
             variant="ghost"
             onClick={onThemeClick}
-            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm"
+            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm mb-3"
             style={{ borderColor }}
           >
             <Edit className="h-4 w-4 mr-2" />
             Personnaliser
+          </Button>
+
+          {/* Bouton pour copier l'URL du forum */}
+          <Button
+            variant="ghost"
+            onClick={handleCopyForumUrl}
+            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm transition-all duration-200"
+            style={{ borderColor }}
+          >
+            {copiedUrl ? (
+              <>
+                <Check className="h-4 w-4 mr-2 text-green-600" />
+                <span className="text-green-600">URL copiée !</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4 mr-2" />
+                Copier l'URL du forum
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
