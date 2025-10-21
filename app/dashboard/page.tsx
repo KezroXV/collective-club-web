@@ -11,6 +11,7 @@ import ManagementSection from "./components/ManagementSection";
 import ShopManagementSection from "./components/ShopManagementSection";
 import ModalsManager from "./components/ModalsManager";
 import DashboardWrapper from "./components/DashboardWrapper";
+import ForumFloatingButton from "./components/ForumFloatingButton";
 
 function DashboardPageContent() {
   const { currentUser, loading } = useCurrentUser();
@@ -175,6 +176,9 @@ function DashboardPageContent() {
           />
         </div>
       </div>
+
+      {/* 💬 Bouton flottant pour accéder au forum */}
+      <ForumFloatingButton />
     </DashboardWrapper>
   );
 }
