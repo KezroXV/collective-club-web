@@ -110,8 +110,9 @@ export default function CategoryFilter({
       fetchCategories();
     };
 
-    window.addEventListener('categoryCreated', handleCategoryCreated);
-    return () => window.removeEventListener('categoryCreated', handleCategoryCreated);
+    window.addEventListener("categoryCreated", handleCategoryCreated);
+    return () =>
+      window.removeEventListener("categoryCreated", handleCategoryCreated);
   }, []);
 
   // Ajouter "Tout" en premier
@@ -154,7 +155,7 @@ export default function CategoryFilter({
     <div className="bg-transparent">
       <div className="container mx-auto px-6">
         {/* Top Row: Filter + Search + Create Button */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 pb-4 sm:pb-6">
           {/* Bouton Filtrer avec dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -165,7 +166,6 @@ export default function CategoryFilter({
               >
                 <Filter className="h-4 w-4" />
                 Filtrer
-                <ChevronDown className="h-4 w-4 ml-1" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">

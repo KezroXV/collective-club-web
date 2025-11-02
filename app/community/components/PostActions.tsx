@@ -49,7 +49,7 @@ const PostActions = ({
   const { colors } = useTheme();
 
   return (
-    <div className="flex items-center justify-between pt-4 border-t" style={{ borderTopColor: colors.Bordures }}>
+    <div className="flex items-center justify-between pt-4">
       <div className="flex items-center gap-6">
         {/* Reactions with dropdown */}
         <div className="relative">

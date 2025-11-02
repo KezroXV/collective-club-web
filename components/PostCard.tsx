@@ -369,7 +369,7 @@ export default function PostCard({
                 style={{
                   backgroundColor: `${colors.Posts}15`,
                   color: colors.Posts,
-                  border: `1px solid ${colors.Posts}30`
+                  border: `1px solid ${colors.Posts}30`,
                 }}
               >
                 <Pin className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
@@ -401,7 +401,7 @@ export default function PostCard({
 
         {/* Post Image */}
         {post.imageUrl && (
-          <div className="mb-8 ">
+          <div className="mb-2.5 ">
             <div
               className="rounded-2xl overflow-hidden hover:shadow-sm"
               style={{ border: `1px solid ${colors.Bordures}` }}
@@ -480,14 +480,16 @@ export default function PostCard({
                           e.stopPropagation();
                         }}
                         className={`p-2 rounded transition-colors text-lg relative ${
-                          isSelected
-                            ? "border-2"
-                            : "hover:bg-gray-100"
+                          isSelected ? "border-2" : "hover:bg-gray-100"
                         }`}
-                        style={isSelected ? {
-                          backgroundColor: `${colors.Posts}15`,
-                          borderColor: colors.Posts
-                        } : {}}
+                        style={
+                          isSelected
+                            ? {
+                                backgroundColor: `${colors.Posts}15`,
+                                borderColor: colors.Posts,
+                              }
+                            : {}
+                        }
                         title={type}
                       >
                         {emoji}
@@ -523,20 +525,6 @@ export default function PostCard({
           <span className="text-xs sm:text-base font-medium">
             {post._count.comments}
           </span>
-        </Button>
-
-        <Button
-          variant="outline"
-          className="ml-auto flex items-center gap-1 sm:gap-2 bg-white px-2 sm:px-4 py-1.5 sm:py-2 h-8 sm:h-auto rounded-full hover:bg-gray-100 text-gray-600"
-          style={{ borderColor: colors.Bordures }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleShare();
-          }}
-        >
-          <Share2 className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="text-xs sm:text-sm">Partager</span>
         </Button>
       </div>
     </div>

@@ -75,8 +75,7 @@ const CommentsSection = ({
 
   return (
     <section
-      className="mt-8 pt-6 border-t"
-      style={{ borderTopColor: colors.Bordures }}
+      className="mt-8 pt-6"
       itemScope
       itemType="https://schema.org/ItemList"
       aria-label="Section des commentaires"

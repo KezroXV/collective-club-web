@@ -145,7 +145,7 @@ function HeaderContent() {
         borderBottomColor: colors.Bordures,
       }}
     >
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="px-4 sm:px-6">
         <div className="flex justify-between items-center h-16 sm:h-[72px]">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-3 group">
@@ -375,7 +375,7 @@ export default function Header() {
     <Suspense
       fallback={
         <header className="border-b bg-white sticky top-0 z-50">
-          <div className="container mx-auto px-4 sm:px-6">
+          <div className="px-4 sm:px-6">
             <div className="flex justify-between items-center h-16 sm:h-[72px]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-200 rounded-xl animate-pulse"></div>

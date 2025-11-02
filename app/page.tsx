@@ -179,7 +179,7 @@ function HomePageContent() {
       <div className="bg-gray-50 min-h-screen">
         <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
           <div
-            className="max-w-4xl mx-auto rounded-[16px] sm:rounded-[22px] hover:shadow-sm overflow-hidden bg-white"
+            className="max-w-3xl mx-auto rounded-[16px] sm:rounded-[22px] hover:shadow-sm overflow-hidden bg-white"
             style={{
               border: `1px solid ${colors.Bordures}`,
             }}

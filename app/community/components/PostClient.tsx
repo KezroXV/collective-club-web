@@ -421,11 +421,11 @@ const PostClient = () => {
     return (
       <ThemeWrapper applyBackgroundColor={true} className="min-h-screen">
         <div className="container mx-auto px-6 py-8">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-[1200px] mx-auto">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded mb-4"></div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-[750px_400px] gap-8 justify-center">
+                <div className="space-y-4">
                   <div className="h-64 bg-gray-200 rounded"></div>
                 </div>
                 <div className="space-y-4">
@@ -443,7 +443,7 @@ const PostClient = () => {
     return (
       <ThemeWrapper applyBackgroundColor={true} className="min-h-screen">
         <div className="container mx-auto px-6 py-8">
-          <div className="max-w-6xl mx-auto text-center">
+          <div className="max-w-[1200px] mx-auto text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
               Post introuvable
             </h1>
@@ -462,7 +462,7 @@ const PostClient = () => {
     <ThemeWrapper applyBackgroundColor={true} className="min-h-screen">
       <Header />
       <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           {/* Breadcrumbs SEO */}
           <PostBreadcrumbs post={post} />
 
@@ -481,9 +481,9 @@ const PostClient = () => {
           </div>
 
           {/* Layout 2 colonnes */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-            {/* Colonne principale (66%) */}
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-[750px_400px] gap-4 sm:gap-8 justify-center">
+            {/* Colonne principale (750px) */}
+            <div>
               <Card
                 className="hover:shadow-sm transition-shadow bg-white"
                 style={{

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { HelpCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Image from "next/image";
 
 interface StatData {
@@ -67,7 +67,7 @@ function StatCard({
         <CardContent className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-1">
             <div className="h-3 sm:h-4 w-12 sm:w-16 bg-gray-200 rounded"></div>
-            <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+            <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
             <div className="h-6 w-12 sm:h-8 sm:w-16 bg-gray-200 rounded"></div>
@@ -79,7 +79,7 @@ function StatCard({
   }
 
   const trendColor =
-    trend === "up" ? "text-green-500 bg-green-50" : "text-red-500 bg-red-50";
+    trend === "up" ? "text-green-500" : "text-red-500";
   const trendIcon = trend === "up" ? "↑" : "↓";
   const valueColor = title === "Posts" ? "text-blue-600" : "text-gray-900";
 
@@ -91,7 +91,7 @@ function StatCard({
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-center justify-between mb-1">
           <p className="text-sm sm:text-lg text-black text-semibold">{title}</p>
-          <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+          <AlertCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
           <Image
@@ -108,7 +108,7 @@ function StatCard({
           </span>
           {variation > 0 && (
             <span
-              className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${trendColor} transition-all duration-200 whitespace-nowrap`}
+              className={`text-[10px] sm:text-xs ${trendColor} transition-all duration-200 whitespace-nowrap`}
             >
               {trendIcon} {variation}%
             </span>
