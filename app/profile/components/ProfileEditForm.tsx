@@ -56,15 +56,11 @@ interface User {
 
 interface ProfileEditFormProps {
   currentUser: User;
-  isEditing: boolean;
-  onEditingChange: (editing: boolean) => void;
   borderColor?: string;
 }
 
 export default function ProfileEditForm({
   currentUser,
-  isEditing,
-  onEditingChange,
   borderColor = "#E5E7EB",
 }: ProfileEditFormProps) {
   const { update: updateSession } = useSession();
@@ -155,7 +151,6 @@ export default function ProfileEditForm({
         }
       }
 
-      onEditingChange(false);
       setEditForm((prev) => ({
         ...prev,
         newPassword: "",
@@ -170,18 +165,6 @@ export default function ProfileEditForm({
     }
   };
 
-  const handleCancel = () => {
-    onEditingChange(false);
-    setEditForm({
-      name: currentUser.name || "",
-      email: currentUser.email || "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setSelectedImage(null);
-    setImagePreview(null);
-  };
-
   return (
     <Card style={{ borderColor }}>
       <CardHeader>
@@ -190,7 +173,7 @@ export default function ProfileEditForm({
       <CardContent className="space-y-6">
         <ProfilePhotoUpload
           currentUser={currentUser}
-          isEditing={isEditing}
+          isEditing={true}
           selectedImage={selectedImage}
           setSelectedImage={setSelectedImage}
           imagePreview={imagePreview}
@@ -199,51 +182,39 @@ export default function ProfileEditForm({
 
         <div className="space-y-2">
           <Label htmlFor="name">Nom</Label>
-          {isEditing ? (
-            <Input
-              id="name"
-              value={editForm.name}
-              onChange={(e) =>
-                setEditForm((prev) => ({
-                  ...prev,
-                  name: e.target.value,
-                }))
-              }
-              placeholder="Votre nom complet"
-            />
-          ) : (
-            <div className="p-2 border rounded-md bg-gray-50">
-              {currentUser.name || "Non renseigné"}
-            </div>
-          )}
+          <Input
+            id="name"
+            value={editForm.name}
+            onChange={(e) =>
+              setEditForm((prev) => ({
+                ...prev,
+                name: e.target.value,
+              }))
+            }
+            placeholder="Votre nom complet"
+          />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          {isEditing ? (
-            <div>
-              <Input
-                id="email"
-                value={editForm.email}
-                onChange={(e) =>
-                  setEditForm((prev) => ({
-                    ...prev,
-                    email: e.target.value,
-                  }))
-                }
-                type="email"
-                disabled
-                className="bg-gray-50"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Email géré par Google (non modifiable)
-              </p>
-            </div>
-          ) : (
-            <div className="p-2 border rounded-md bg-gray-50">
-              {currentUser.email}
-            </div>
-          )}
+          <div>
+            <Input
+              id="email"
+              value={editForm.email}
+              onChange={(e) =>
+                setEditForm((prev) => ({
+                  ...prev,
+                  email: e.target.value,
+                }))
+              }
+              type="email"
+              disabled
+              className="bg-gray-50"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Email géré par Google (non modifiable)
+            </p>
+          </div>
         </div>
 
         {!isOAuthUser() && (
@@ -253,71 +224,60 @@ export default function ProfileEditForm({
                 Modification du mot de passe
               </h3>
 
-              {isEditing && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">
-                      Nouveau mot de passe
-                    </Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      value={editForm.newPassword}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          newPassword: e.target.value,
-                        }))
-                      }
-                      placeholder="Laissez vide pour ne pas modifier"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">
-                      Confirmez le nouveau mot de passe
-                    </Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={editForm.confirmPassword}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          confirmPassword: e.target.value,
-                        }))
-                      }
-                      placeholder="Confirmez votre nouveau mot de passe"
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">
+                    Nouveau mot de passe
+                  </Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={editForm.newPassword}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        newPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Laissez vide pour ne pas modifier"
+                  />
                 </div>
-              )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">
+                    Confirmez le nouveau mot de passe
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={editForm.confirmPassword}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Confirmez votre nouveau mot de passe"
+                  />
+                </div>
+              </div>
             </div>
           </>
         )}
 
-        {isEditing && (
-          <div className="flex gap-2 pt-4">
-            <Button
-              onClick={handleSaveProfile}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              )}
-              <Save className="h-4 w-4" />
-              {isSaving ? "Sauvegarde..." : "Enregistrer"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isSaving}
-            >
-              Annuler
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2 pt-4">
+          <Button
+            onClick={handleSaveProfile}
+            disabled={isSaving}
+            className="flex items-center gap-2"
+          >
+            {isSaving && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            <Save className="h-4 w-4" />
+            {isSaving ? "Sauvegarde..." : "Enregistrer"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

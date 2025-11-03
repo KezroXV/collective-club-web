@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import ThemeWrapper from "@/components/ThemeWrapper";
 import AuthorSidebar from "@/app/community/components/AuthorSidebar";
-import ProfileHeader from "./components/ProfileHeader";
 import ProfileEditForm from "./components/ProfileEditForm";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -52,8 +51,6 @@ export default function ProfilePage() {
   const [badges, setBadges] = useState<BadgeInfo[]>([]);
   const [points, setPoints] = useState<number>(0);
   const [loadingProfileData, setLoadingProfileData] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -99,15 +96,6 @@ export default function ProfilePage() {
     loadProfileData();
   }, [currentUser]);
 
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-  };
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    // This will be handled by ProfileEditForm
-    setTimeout(() => setIsSaving(false), 1000);
-  };
 
   if (loading) {
     return (
@@ -151,16 +139,14 @@ export default function ProfilePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <ProfileHeader
-                isEditing={isEditing}
-                isSaving={isSaving}
-                onEditingToggle={handleEditToggle}
-                onSaveProfile={handleSaveProfile}
-              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Profil</h1>
+                <p className="text-gray-600">
+                  Vous pouvez gérer votre profil ici
+                </p>
+              </div>
               <ProfileEditForm
                 currentUser={currentUser}
-                isEditing={isEditing}
-                onEditingChange={setIsEditing}
                 borderColor={colors.Bordures}
               />
             </div>
