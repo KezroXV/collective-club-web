@@ -197,19 +197,19 @@ export default function RolesMembersModal({
       const params = new URLSearchParams();
       if (userId) params.append("userId", userId);
 
-      const requestBody = { 
+      const requestBody = {
         userId: userId,
         userRole: currentUserRole,
         newRole: newRole,
-        reason 
+        reason,
       };
-      
-      console.log('Frontend sending role change request:', {
+
+      console.log("Frontend sending role change request:", {
         memberId,
         requestBody,
         userId,
         currentUserRole,
-        newRole
+        newRole,
       });
 
       const response = await fetch(
@@ -310,11 +310,11 @@ export default function RolesMembersModal({
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <h3 className="text-xl font-semibold">Rôles</h3>
-          <div className="relative flex-1">
+          <div className="relative flex-[2]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               type="text"
-              placeholder="Rechercher par nom ou email..."
+              placeholder="Rechercher"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-10 h-10"
@@ -389,7 +389,7 @@ export default function RolesMembersModal({
                 <div
                   key={member.id}
                   className={`py-4 ${
-                    index !== 0 ? "border-t border-chart-4" : ""
+                    index !== 0 ? "border-t border-gray-200" : ""
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">

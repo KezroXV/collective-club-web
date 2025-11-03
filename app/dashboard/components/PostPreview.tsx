@@ -27,7 +27,7 @@ export default function PostPreview({
 }: PostPreviewProps) {
   return (
     <div className="lg:sticky lg:top-4">
-      <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 sm:mb-4">
+      <h4 className="font-bold text-sm sm:text-base text-gray-900 mb-2 sm:mb-4">
         Aperçu
       </h4>
 
@@ -60,6 +60,12 @@ export default function PostPreview({
             </p>
           </div>
         </div>
+        <p
+          className="text-xs sm:text-[15px] mb-2 sm:mb-3 font-medium line-clamp-2 sm:line-clamp-none"
+          style={{ color: colors.Police }}
+        >
+          Vous connaissez un bon site qui vends des marques vintage ?
+        </p>
         <div className="flex items-center gap-1.5 sm:gap-2.5 flex-wrap mb-2 sm:mb-3">
           {CATEGORY_PREVIEW.map((c) => (
             <div
@@ -81,15 +87,8 @@ export default function PostPreview({
             </div>
           ))}
         </div>
-        <p
-          className="text-xs sm:text-[15px] mb-2 sm:mb-3 font-medium line-clamp-2 sm:line-clamp-none"
-          style={{ color: colors.Police }}
-        >
-          Vous connaissez un bon site qui vends des marques vintage ?
-        </p>
         <div
-          className="rounded-lg sm:rounded-xl overflow-hidden border mb-3 sm:mb-4"
-          style={{ borderColor: colors.Bordures }}
+          className="rounded-lg sm:rounded-xl overflow-hidden mb-3 sm:mb-4"
         >
           <Image
             src="/Post-picture.png"

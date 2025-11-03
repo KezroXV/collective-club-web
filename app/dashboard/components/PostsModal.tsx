@@ -328,7 +328,7 @@ export default function PostsModal({
               filteredPosts.map((post) => (
                 <Card
                   key={post.id}
-                  className="hover:shadow-md transition-all duration-200"
+                  className="hover:shadow-md transition-all duration-200 py-0"
                 >
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex items-start mb-0 justify-between gap-2">

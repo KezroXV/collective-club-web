@@ -25,6 +25,7 @@ import {
   Users,
   Copy,
   Check,
+  Pencil,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -758,10 +759,10 @@ export default function ShopManagementSection({
           <Button
             variant="ghost"
             onClick={onThemeClick}
-            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm mb-3"
+            className="w-full justify-center h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm mb-3"
             style={{ borderColor }}
           >
-            <Edit className="h-4 w-4 mr-2" />
+            <Pencil className="h-4 w-4 mr-2" />
             Personnaliser
           </Button>
 
@@ -769,7 +770,7 @@ export default function ShopManagementSection({
           <Button
             variant="ghost"
             onClick={handleCopyForumUrl}
-            className="w-full justify-start h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm transition-all duration-200"
+            className="w-full justify-center h-12 sm:h-16 border border-dashed text-gray-600 hover:bg-gray-50 text-sm transition-all duration-200"
             style={{ borderColor }}
           >
             {copiedUrl ? (

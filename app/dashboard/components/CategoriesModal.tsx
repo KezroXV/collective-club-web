@@ -211,11 +211,11 @@ export default function CategoriesModal({
         <div className="space-y-3 sm:space-y-4">
           {/* Barre de recherche et bouton d'ajout */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <div className="relative flex-1">
+            <div className="relative flex-[2]">
               <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <Input
                 type="text"
-                placeholder="Rechercher..."
+                placeholder="Rechercher"
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
@@ -227,7 +227,7 @@ export default function CategoriesModal({
               <Button
                 variant="default"
                 onClick={() => setShowCreateModal(true)}
-                className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 text-xs sm:text-sm px-3"
+                className="shrink-0 flex items-center gap-1.5 sm:gap-2 h-9 sm:h-10 text-xs sm:text-sm px-3 mr-1"
               >
                 <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">Nouvelle catégorie</span>

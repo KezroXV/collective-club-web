@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Plus, Edit2, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -121,7 +120,14 @@ export default function CustomizationModal({
       setLogoImage(globalLogoImage || null);
       loadBadges();
     }
-  }, [isOpen, globalColors, globalFont, globalBannerImage, globalLogoImage, loadBadges]);
+  }, [
+    isOpen,
+    globalColors,
+    globalFont,
+    globalBannerImage,
+    globalLogoImage,
+    loadBadges,
+  ]);
 
   const handleColorChange = (color: string) => {
     setColors((prev) => ({
@@ -228,37 +234,47 @@ export default function CustomizationModal({
             <div className="lg:col-span-4 space-y-3 sm:space-y-4">
               {/* Section Couleurs */}
               <div>
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
                   Couleurs
                 </h3>
 
-                <Tabs value={activeColorTab} onValueChange={setActiveColorTab}>
-                  <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10">
-                    <TabsTrigger value="Posts" className="text-xs sm:text-sm">
-                      Posts
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="Bordures"
-                      className="text-xs sm:text-sm"
-                    >
-                      Bordures
-                    </TabsTrigger>
-                    <TabsTrigger value="Police" className="text-xs sm:text-sm">
-                      Police
-                    </TabsTrigger>
-                  </TabsList>
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  <Button
+                    variant={activeColorTab === "Posts" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveColorTab("Posts")}
+                    className="text-xs sm:text-sm rounded-full"
+                  >
+                    Posts
+                  </Button>
+                  <Button
+                    variant={activeColorTab === "Bordures" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveColorTab("Bordures")}
+                    className="text-xs sm:text-sm rounded-full"
+                  >
+                    Bordures
+                  </Button>
+                  <Button
+                    variant={activeColorTab === "Police" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveColorTab("Police")}
+                    className="text-xs sm:text-sm rounded-full"
+                  >
+                    Police
+                  </Button>
+                </div>
 
-                  <ColorPicker
-                    color={colors[activeColorTab as keyof typeof colors]}
-                    onChange={handleColorChange}
-                    borderColor={colors.Bordures}
-                  />
-                </Tabs>
+                <ColorPicker
+                  color={colors[activeColorTab as keyof typeof colors]}
+                  onChange={handleColorChange}
+                  borderColor={colors.Bordures}
+                />
               </div>
 
               {/* Section Police */}
               <div>
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
                   Police
                 </h3>
                 <div className="flex gap-1.5 sm:gap-2 flex-wrap">
@@ -283,10 +299,36 @@ export default function CustomizationModal({
 
               {/* Section Logo du forum */}
               <div>
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">
-                    Logo du forum
-                  </h3>
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
+                  Logo du forum
+                </h3>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative flex items-center justify-center">
+                    {logoImage ? (
+                      <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                        <Image
+                          src={logoImage}
+                          alt="Logo"
+                          width={96}
+                          height={96}
+                          className="w-full h-full object-cover rounded-xl border border-chart-4"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center"
+                        style={{
+                          background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
+                        }}
+                      >
+                        <span className="text-white font-bold text-3xl sm:text-4xl">
+                          ?
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   <Button
                     onClick={() => logoInputRef.current?.click()}
                     variant="outline"
@@ -296,31 +338,6 @@ export default function CustomizationModal({
                     <Upload className="h-3 w-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     {logoImage ? "Changer" : "Ajouter"}
                   </Button>
-                </div>
-
-                <div className="relative flex items-center justify-center">
-                  {logoImage ? (
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-                      <Image
-                        src={logoImage}
-                        alt="Logo"
-                        width={96}
-                        height={96}
-                        className="w-full h-full object-cover rounded-xl border border-chart-4"
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center"
-                      style={{
-                        background: `linear-gradient(135deg, ${colors.Posts} 0%, ${colors.Posts}dd 100%)`,
-                      }}
-                    >
-                      <span className="text-white font-bold text-3xl sm:text-4xl">
-                        ?
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 <input
@@ -334,29 +351,30 @@ export default function CustomizationModal({
 
               {/* Section Bannière */}
               <div>
-                <div className="flex items-center justify-between mb-2 sm:mb-3">
-                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">
-                    Bannière du forum
-                  </h3>
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
+                  Photo de couverture{" "}
+                </h3>
+
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <Image
+                      src={bannerImage}
+                      alt="Bannière"
+                      width={400}
+                      height={100}
+                      className="w-full h-20 sm:h-24 object-cover rounded-lg"
+                    />
+                  </div>
+
                   <Button
                     onClick={() => bannerInputRef.current?.click()}
                     variant="outline"
                     size="sm"
-                    className="text-gray-600 hover:text-gray-700 h-8 text-xs"
+                    className="text-gray-600 hover:text-gray-700 h-8 text-xs flex-shrink-0"
                   >
                     <Upload className="h-3 w-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Changer
                   </Button>
-                </div>
-
-                <div className="relative">
-                  <Image
-                    src={bannerImage}
-                    alt="Bannière"
-                    width={400}
-                    height={100}
-                    className="w-full h-20 sm:h-24 object-cover rounded-lg border border-chart-4"
-                  />
                 </div>
 
                 <input
@@ -370,7 +388,7 @@ export default function CustomizationModal({
 
               {/* Section Paliers */}
               <div>
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 mb-2 sm:mb-3">
                   Paliers
                 </h3>
                 <div className="grid grid-cols-4 gap-2 sm:gap-3">
@@ -418,16 +436,16 @@ export default function CustomizationModal({
                       ))}
                     </>
                   )}
-                  <div className="text-center">
+                  <div className=" text-left">
                     <button
                       onClick={() => setIsAddBadgeModalOpen(true)}
-                      className="w-10 h-10 sm:w-14 sm:h-14 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center mx-auto mb-1 sm:mb-1.5 hover:border-gray-400 transition-colors bg-white/60"
+                      className="w-10 h-10 sm:w-14 sm:h-14 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center mb-1 sm:mb-1.5 hover:border-gray-400 transition-colors bg-white/60"
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                      <p className="font-medium text-[10px] sm:text-xs text-gray-500">
+                        Ajouter
+                      </p>
                     </button>
-                    <p className="font-medium text-[10px] sm:text-xs text-gray-500">
-                      Ajouter
-                    </p>
                   </div>
                 </div>
               </div>
@@ -444,7 +462,7 @@ export default function CustomizationModal({
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t mt-3 sm:mt-4 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t border-gray-200 mt-3 sm:mt-4 flex-shrink-0">
             <Button
               variant="outline"
               onClick={handleReset}
