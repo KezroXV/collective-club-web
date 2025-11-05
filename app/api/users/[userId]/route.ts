@@ -44,9 +44,17 @@ export async function DELETE(
 
     // Vérifier que l'utilisateur cible existe et appartient à la bonne boutique
     const targetUser = await prisma.user.findFirst({
-      where: { 
-        id: targetUserId, 
-        shopId 
+      where: {
+        id: targetUserId,
+        shopId
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isShopOwner: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -143,9 +151,17 @@ export async function PUT(
 
     // Vérifier que l'utilisateur cible existe et appartient à la bonne boutique
     const targetUser = await prisma.user.findFirst({
-      where: { 
-        id: targetUserId, 
-        shopId 
+      where: {
+        id: targetUserId,
+        shopId
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isShopOwner: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -169,11 +185,18 @@ export async function PUT(
     // Mettre à jour le rôle de l'utilisateur
     const updatedUser = await prisma.user.update({
       where: { id: targetUserId },
-      data: { role: newRole as any }
+      data: { role: newRole as any },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
+      }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: `Rôle modifié vers ${newRole}`,
       user: {
         id: updatedUser.id,

@@ -34,9 +34,17 @@ export async function PUT(request: NextRequest) {
 
     // Trouver l'utilisateur actuel
     const currentUser = await prisma.user.findFirst({
-      where: { 
+      where: {
         email: session.user.email,
-        shopId 
+        shopId
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 

@@ -41,6 +41,13 @@ export async function PUT(
       where: {
         id: userId,
         shopId
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -69,7 +76,14 @@ export async function PUT(
     // Mettre à jour le rôle de l'utilisateur
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { role: roleName }
+      data: { role: roleName },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
+      }
     });
 
     return NextResponse.json({

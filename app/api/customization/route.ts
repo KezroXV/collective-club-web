@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
       where: {
         id: userId, // userId est déjà l'ID de l'utilisateur
         shopId // Vérifier qu'il appartient à cette boutique
+      },
+      select: {
+        id: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 

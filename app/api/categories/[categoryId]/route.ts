@@ -29,6 +29,10 @@ export async function PUT(
         where: {
           shopId,
           role: "ADMIN"
+        },
+        select: {
+          id: true,
+          // ⚠️ NE JAMAIS inclure password dans les select !
         }
       });
       
@@ -154,6 +158,10 @@ export async function DELETE(
         where: {
           shopId,
           role: "ADMIN"
+        },
+        select: {
+          id: true,
+          // ⚠️ NE JAMAIS inclure password dans les select !
         }
       });
       

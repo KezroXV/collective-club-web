@@ -93,6 +93,7 @@ model User {
   email         String   // ✅ SUPPRIMER @unique - unicité seulement par shop
   name          String?
   image         String?  // Avatar NextAuth
+  password      String?  // ✅ Hash bcrypt pour auth credentials (nullable pour compatibilité OAuth)
   emailVerified DateTime? // Requis NextAuth
   role          String   @default("MEMBER") // Rôle par boutique (dynamique)
   isShopOwner   Boolean  @default(false) // Marqueur propriétaire boutique

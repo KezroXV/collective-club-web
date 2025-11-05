@@ -38,6 +38,14 @@ export async function POST(
       where: {
         id: targetUserId,
         shopId
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isBanned: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -77,6 +85,15 @@ export async function POST(
         isBanned: true,
         bannedAt: new Date(),
         bannedBy: currentUser.id
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isBanned: true,
+        bannedAt: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -129,6 +146,14 @@ export async function DELETE(
       where: {
         id: targetUserId,
         shopId
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isBanned: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 
@@ -154,6 +179,14 @@ export async function DELETE(
         isBanned: false,
         bannedAt: null,
         bannedBy: null
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        isBanned: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
       }
     });
 

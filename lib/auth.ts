@@ -1,8 +1,10 @@
 import { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import { getCurrentShopId, createDefaultRolesForShop } from "@/lib/shop-context";
+import bcrypt from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
   // ✅ Ne pas utiliser PrismaAdapter pour multi-tenant - gérer manuellement
@@ -19,17 +21,108 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
+    CredentialsProvider({
+      id: "credentials",
+      name: "Email et Mot de passe",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Mot de passe", type: "password" },
+        shop: { label: "Shop", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password || !credentials?.shop) {
+          throw new Error("Email, mot de passe et shop requis");
+        }
+
+        try {
+          // Récupérer le shop
+          const shop = await prisma.shop.findUnique({
+            where: { shopDomain: credentials.shop },
+            select: { id: true },
+          });
+
+          if (!shop) {
+            throw new Error("Shop non trouvé");
+          }
+
+          // Rechercher l'utilisateur par email ET shopId
+          const user = await prisma.user.findFirst({
+            where: {
+              email: credentials.email,
+              shopId: shop.id,
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              image: true,
+              password: true,
+              role: true,
+              isShopOwner: true,
+              shopId: true,
+              isBanned: true,
+              roleInfo: true,
+            },
+          });
+
+          if (!user) {
+            throw new Error("Email ou mot de passe incorrect");
+          }
+
+          // Vérifier si l'utilisateur est banni
+          if (user.isBanned) {
+            throw new Error("Votre compte a été suspendu");
+          }
+
+          // Vérifier si l'utilisateur a un mot de passe (peut être un compte OAuth)
+          if (!user.password) {
+            throw new Error("Ce compte utilise une autre méthode de connexion");
+          }
+
+          // 🔐 Vérifier le mot de passe avec bcrypt
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            throw new Error("Email ou mot de passe incorrect");
+          }
+
+          // ✅ Authentification réussie
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role as "ADMIN" | "MODERATOR" | "MEMBER",
+            isShopOwner: user.isShopOwner,
+            shopId: user.shopId,
+            roleInfo: user.roleInfo,
+          };
+        } catch (error) {
+          console.error("Erreur d'authentification credentials:", error);
+          throw error;
+        }
+      },
+    }),
   ],
 
   callbacks: {
     async signIn({ user, account }) {
-      if (!user.email || account?.provider !== "google") return false;
+      if (!user.email) return false;
 
-      // Récupérer le shopId OBLIGATOIRE
-      const shopId = await getCurrentShopId();
+      // ✅ Si credentials provider, l'authentification a déjà été validée dans authorize()
+      if (account?.provider === "credentials") {
+        return true;
+      }
 
-      if (!shopId) {
-        return false; // ❌ BLOQUER si pas de shopId
+      // Pour Google OAuth, vérifier le shopId
+      if (account?.provider === "google") {
+        const shopId = await getCurrentShopId();
+        if (!shopId) {
+          return false; // ❌ BLOQUER si pas de shopId
+        }
       }
 
       return true;
@@ -49,6 +142,20 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token, user, account }) {
+      // ✅ Premier sign-in avec Credentials
+      if (user && account?.provider === "credentials") {
+        // Les données sont déjà complètes depuis authorize()
+        token.sub = user.id;
+        token.email = user.email;
+        token.role = (user as any).role as "ADMIN" | "MODERATOR" | "MEMBER";
+        token.isShopOwner = (user as any).isShopOwner;
+        token.shopId = (user as any).shopId;
+        token.name = user.name;
+        token.picture = user.image;
+        token.roleInfo = (user as any).roleInfo;
+        return token;
+      }
+
       // Premier sign-in avec Google
       if (user && account?.provider === "google") {
         try {

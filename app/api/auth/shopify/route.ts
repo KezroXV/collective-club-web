@@ -46,6 +46,10 @@ export async function POST(request: NextRequest) {
         shopId: shopRecord.id,
         isShopOwner: true,
       },
+      select: {
+        id: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
+      },
     });
 
     const role: "ADMIN" | "MODERATOR" | "MEMBER" = !existingAdmin
@@ -62,6 +66,15 @@ export async function POST(request: NextRequest) {
         email: email,
         shopId: shopRecord.id,
       },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        shopId: true,
+        isShopOwner: true,
+        // ⚠️ NE JAMAIS inclure password dans les select !
+      },
     });
 
     if (!user) {
@@ -73,6 +86,15 @@ export async function POST(request: NextRequest) {
           shopId: shopRecord.id,
           role: role,
           isShopOwner: isShopOwner,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          shopId: true,
+          isShopOwner: true,
+          // ⚠️ NE JAMAIS inclure password dans les select !
         },
       });
 
