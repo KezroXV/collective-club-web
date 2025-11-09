@@ -11,7 +11,8 @@
     "db:seed": "prisma db seed",
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "admin": "tsx scripts/ensure-admin.ts",
-    "recovery": "tsx scripts/data-recovery.ts"
+    "recovery": "tsx scripts/data-recovery.ts",
+    "test:session-tokens": "tsx scripts/test-session-tokens.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.24",
