@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
+import {
+  collectUserData,
+  generateJSONReport,
+  generateTextReport,
+  formatBytes,
+  calculateExportSize,
+} from "@/lib/gdpr";
+import { sendGDPRDataEmail } from "@/lib/email";
 
 // Vérification de la signature HMAC Shopify
 function verifyShopifyWebhook(
@@ -84,11 +92,119 @@ async function handleCustomerDataRequest(
   console.log("Customer data request:", {
     shopDomain,
     customerId: data.customer?.id,
+    customerEmail: data.customer?.email,
   });
 
-  // TODO: Implémenter l'export des données client
-  // Pour l'instant, juste logger la demande
-  // Vous devez envoyer les données du client à l'email fourni dans data.customer.email
+  if (!shopDomain) {
+    console.error("No shop domain provided for data request");
+    return;
+  }
+
+  try {
+    // 1. Récupérer le shop
+    const shop = await prisma.shop.findUnique({
+      where: { shopDomain },
+    });
+
+    if (!shop) {
+      console.error(`Shop not found: ${shopDomain}`);
+      return;
+    }
+
+    // 2. Extraire l'email du client
+    const customerEmail = data.customer?.email;
+    const orderId = data.orders_requested?.[0]; // ID de commande Shopify (si disponible)
+
+    if (!customerEmail) {
+      console.error("No customer email provided in data request");
+      return;
+    }
+
+    console.log(`📦 Processing GDPR data request for ${customerEmail} in shop ${shopDomain}`);
+
+    // 3. Collecter toutes les données utilisateur
+    const userData = await collectUserData(shop.id, customerEmail);
+
+    if (!userData) {
+      console.log(`No user data found for ${customerEmail} in shop ${shopDomain}`);
+
+      // Envoyer un email indiquant qu'aucune donnée n'a été trouvée
+      await sendGDPRDataEmail(
+        customerEmail,
+        {
+          metadata: {
+            exportDate: new Date().toISOString(),
+            dataSubject: customerEmail,
+            shopDomain: shopDomain,
+            format: 'json',
+          },
+          personalInformation: {} as any,
+          accounts: [],
+          posts: [],
+          comments: [],
+          reactions: [],
+          pollVotes: [],
+          socialConnections: { following: [], followers: [] },
+          gamification: { totalPoints: 0, badges: [], pointTransactions: [] },
+          customization: null,
+          onboarding: null,
+        },
+        `Bonjour,\n\nNous avons reçu votre demande d'export de données personnelles.\n\nAucune donnée n'a été trouvée pour l'adresse email ${customerEmail} dans notre système.\n\nSi vous pensez qu'il s'agit d'une erreur, veuillez contacter notre support.\n\nCordialement,\nL'équipe ${shopDomain}`,
+        '{}'
+      );
+      return;
+    }
+
+    // 4. Générer les rapports
+    const jsonReport = generateJSONReport(userData);
+    const textReport = generateTextReport(userData);
+    const exportSize = calculateExportSize(userData);
+
+    console.log(`✅ Data collected for ${customerEmail}:`);
+    console.log(`   - Posts: ${userData.posts.length}`);
+    console.log(`   - Comments: ${userData.comments.length}`);
+    console.log(`   - Reactions: ${userData.reactions.length}`);
+    console.log(`   - Total points: ${userData.gamification.totalPoints}`);
+    console.log(`   - Export size: ${formatBytes(exportSize)}`);
+
+    // 5. Envoyer l'email avec les données
+    const emailResult = await sendGDPRDataEmail(
+      customerEmail,
+      userData,
+      textReport,
+      jsonReport
+    );
+
+    if (emailResult.success) {
+      console.log(`✅ GDPR data email sent successfully to ${customerEmail}`);
+
+      // Log l'export dans la base de données (optionnel, pour audit)
+      try {
+        await prisma.pointTransaction.create({
+          data: {
+            shopId: shop.id,
+            userId: userData.personalInformation.userId,
+            userPointsId: (await prisma.userPoints.findFirst({
+              where: {
+                userId: userData.personalInformation.userId,
+                shopId: shop.id,
+              },
+              select: { id: true },
+            }))!.id,
+            points: 0,
+            action: 'DAILY_LOGIN', // Utiliser une action existante pour ne pas casser le schéma
+            description: `GDPR data export requested and sent to ${customerEmail}`,
+          },
+        });
+      } catch (logError) {
+        console.error('Could not log GDPR export:', logError);
+      }
+    } else {
+      console.error(`❌ Failed to send GDPR email: ${emailResult.error}`);
+    }
+  } catch (error) {
+    console.error("Error handling customer data request:", error);
+  }
 }
 
 // Handler pour suppression de données client (RGPD)

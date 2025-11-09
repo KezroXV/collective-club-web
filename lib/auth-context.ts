@@ -1,6 +1,5 @@
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
-import { getCurrentShopId } from "@/lib/shop-context"
 
 // Contexte d'auth pour server-side
 export async function getAuthContext() {

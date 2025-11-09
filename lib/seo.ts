@@ -3,6 +3,8 @@
  * Fonctions utilitaires pour optimisation SEO
  */
 
+import { getShopLogoSync } from '@/lib/shopLogo';
+
 /**
  * Génère un slug URL-friendly à partir d'un titre
  * @param title - Titre du post à convertir
@@ -173,15 +175,43 @@ export function extractCommentIdFromURL(url: string): string | null {
 }
 
 /**
- * Génère une URL d'image Open Graph par défaut
- * @param title - Titre pour l'image
+ * Génère une URL d'image Open Graph dynamique
+ * @param title - Titre du post
+ * @param shopName - Nom de la boutique
+ * @param options - Options additionnelles (catégorie, auteur, logo)
  * @param baseUrl - URL de base
- * @returns URL de l'image OG
+ * @returns URL de l'image OG générée dynamiquement
  */
-export function generateOGImageURL(title: string, baseUrl?: string): string {
+export function generateOGImageURL(
+  title: string,
+  shopName: string,
+  options?: {
+    category?: string;
+    author?: string;
+    logoUrl?: string;
+  },
+  baseUrl?: string
+): string {
   const base = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  // TODO: Implémenter génération dynamique d'images OG
-  return `${base}/og-images/default.jpg`;
+
+  const params = new URLSearchParams({
+    title: title.substring(0, 100), // Limiter la longueur
+    shopName,
+  });
+
+  if (options?.category) {
+    params.set('category', options.category);
+  }
+
+  if (options?.author) {
+    params.set('author', options.author);
+  }
+
+  if (options?.logoUrl) {
+    params.set('logoUrl', options.logoUrl);
+  }
+
+  return `${base}/api/og?${params.toString()}`;
 }
 
 /**
@@ -366,7 +396,7 @@ export function generateArticleStructuredData(
     category?: { name: string } | null;
     _count?: { comments: number; reactions: number };
   },
-  shop: { shopName: string; shopDomain: string },
+  shop: { shopName: string; shopDomain: string; logoUrl?: string | null },
   comments?: Array<{
     id: string;
     content: string;
@@ -379,6 +409,9 @@ export function generateArticleStructuredData(
   baseUrl?: string
 ): ArticleStructuredData {
   const base = baseUrl || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+  // Utiliser le logo du shop ou générer un avatar par défaut
+  const logoUrl = getShopLogoSync(shop.logoUrl, shop.shopName);
 
   const structuredData: ArticleStructuredData = {
     '@context': 'https://schema.org',
@@ -401,7 +434,7 @@ export function generateArticleStructuredData(
       url: `https://${shop.shopDomain}`,
       logo: {
         '@type': 'ImageObject',
-        url: `${base}/logo.png` // TODO: Logo de la boutique
+        url: logoUrl
       }
     },
 

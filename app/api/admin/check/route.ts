@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentShopId } from "@/lib/shop-context";
+import { getCurrentShopIdFromContext } from "@/lib/shopIsolation";
 
 /**
  * GET /api/admin/check
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       shopId = shop?.id || null;
     } else {
       // Sinon utiliser le contexte actuel
-      shopId = await getCurrentShopId();
+      shopId = await getCurrentShopIdFromContext();
     }
 
     if (!shopId) {

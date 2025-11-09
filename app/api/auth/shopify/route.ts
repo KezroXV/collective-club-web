@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createDefaultRolesForShop } from "@/lib/shop-context";
+import { createDefaultRolesForShop } from "@/lib/shopIsolation";
 import { encode } from "next-auth/jwt";
 
 /**

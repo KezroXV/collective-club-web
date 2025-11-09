@@ -3,7 +3,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
-import { getCurrentShopId, createDefaultRolesForShop } from "@/lib/shop-context";
+import { getCurrentShopIdFromContext, createDefaultRolesForShop } from "@/lib/shopIsolation";
 import bcrypt from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
 
       // Pour Google OAuth, vérifier le shopId
       if (account?.provider === "google") {
-        const shopId = await getCurrentShopId();
+        const shopId = await getCurrentShopIdFromContext();
         if (!shopId) {
           return false; // ❌ BLOQUER si pas de shopId
         }
@@ -159,7 +159,7 @@ export const authOptions: NextAuthOptions = {
       // Premier sign-in avec Google
       if (user && account?.provider === "google") {
         try {
-          const shopId = await getCurrentShopId();
+          const shopId = await getCurrentShopIdFromContext();
 
           if (!shopId) {
             throw new Error("No shopId available during authentication");
@@ -258,7 +258,7 @@ export const authOptions: NextAuthOptions = {
         }
       } else if (token.sub && token.email) {
         // Connexions suivantes - récupérer le shopId actuel
-        const currentShopId = await getCurrentShopId();
+        const currentShopId = await getCurrentShopIdFromContext();
 
         if (!currentShopId) {
           throw new Error("No shopId available");

@@ -62,13 +62,13 @@ model VerificationToken {
 // 🏪 MODÈLE SHOP POUR MULTI-TENANT
 model Shop {
   id          String   @id @default(cuid())
-  shopDomain  String   @unique // boutique-cosmetic.myshopify.com  
+  shopDomain  String   @unique // boutique-cosmetic.myshopify.com
   shopName    String   // "Cosmetic Paradise"
   ownerId     String   // ID du propriétaire Shopify
   settings    Json?    // Personnalisation (couleurs, etc.)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   // Relations
   users       User[]   // ✅ AJOUTER relation avec les utilisateurs
   accounts    Account[] // ✅ AJOUTER relation avec les comptes NextAuth
@@ -133,7 +133,7 @@ model User {
 }
 model Category {
   id          String @id @default(cuid())
-  name        String 
+  name        String
   color       String // Ex: "bg-orange-500"
   description String?
   isActive    Boolean @default(true)
@@ -162,13 +162,13 @@ model Post {
   shopId    String     // ✅ OBLIGATOIRE pour multi-tenant
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  
+
   // Relations
   shop       Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId   String
   category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?   
+  categoryId String?
 
   comments  Comment[]
   reactions Reaction[]
@@ -182,17 +182,17 @@ model Poll {
   id       String @id @default(cuid())
   question String
   shopId   String  // ✅ OBLIGATOIRE pour multi-tenant
-  
+
   // Relations
   shop     Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
   post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId   String  @unique
-  
+
   options PollOption[]
   votes   PollVote[]
-  
+
   createdAt DateTime @default(now())
-  
+
   @@map("polls")
 }
 
@@ -350,11 +350,11 @@ model Badge {
   shopId         String  // ✅ OBLIGATOIRE pour multi-tenant
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
+
   // Relations
   shop           Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
   userBadges     UserBadge[]
-  
+
   @@unique([shopId, name]) // Nom unique par shop
   @@map("badges")
 }

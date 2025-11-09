@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextRequest } from "next/server";
+import { headers, cookies } from "next/headers";
 import { createDefaultBadgesForShop } from "./defaultBadges";
 
 const prisma = new PrismaClient();
@@ -147,9 +148,10 @@ export async function getShopContext(request: NextRequest): Promise<ShopContext>
           }
         });
 
-        // Créer automatiquement des catégories et des badges par défaut (SANS admin automatique)
+        // Créer automatiquement des catégories, badges et rôles par défaut (SANS admin automatique)
         await createDefaultCategoriesForShop(shop.id);
         await createDefaultBadgesForShop(shop.id);
+        await createDefaultRolesForShop(shop.id);
         
       } catch (dbError) {
         throw new ShopIsolationException({
@@ -226,6 +228,95 @@ export async function getShopIdSafe(request: NextRequest): Promise<string | null
       return null;
     }
     throw error;
+  }
+}
+
+/**
+ * Récupère le shopId depuis le contexte serveur (cookies/headers)
+ * Compatible avec NextAuth et les composants serveur
+ * Alternative à getCurrentShopId() de shop-context.ts
+ */
+export async function getCurrentShopIdFromContext(): Promise<string | null> {
+  try {
+    // Option 1: Depuis le cookie shopDomain (défini par middleware)
+    const cookieStore = await cookies();
+    const shopDomain = cookieStore.get("shopDomain")?.value;
+
+    if (shopDomain) {
+      let shop = await prisma.shop.findUnique({
+        where: { shopDomain },
+        select: { id: true },
+      });
+
+      // Si le shop n'existe pas, le créer automatiquement
+      if (!shop) {
+        shop = await prisma.shop.create({
+          data: {
+            shopDomain: shopDomain,
+            shopName: extractShopName(shopDomain),
+            ownerId: "pending", // À mettre à jour lors du premier admin
+          },
+          select: { id: true },
+        });
+
+        // Créer immédiatement les ressources par défaut
+        await createDefaultCategoriesForShop(shop.id);
+        await createDefaultBadgesForShop(shop.id);
+        await createDefaultRolesForShop(shop.id);
+      }
+
+      return shop?.id || null;
+    }
+
+    // Option 2: Depuis les headers de la requête (fallback)
+    const headersList = await headers();
+    const referer = headersList.get("referer") || "";
+
+    // Extraire shopId depuis l'URL ou query params
+    // Exemple: ?shop=boutique-cosmetic.myshopify.com
+    const shopMatch = referer.match(/[?&]shop=([^&]+)/);
+    if (shopMatch) {
+      const shopDomainFromUrl = shopMatch[1];
+
+      let shop = await prisma.shop.findUnique({
+        where: { shopDomain: shopDomainFromUrl },
+        select: { id: true },
+      });
+
+      // Si le shop n'existe pas, le créer automatiquement
+      if (!shop) {
+        shop = await prisma.shop.create({
+          data: {
+            shopDomain: shopDomainFromUrl,
+            shopName: extractShopName(shopDomainFromUrl),
+            ownerId: "pending",
+          },
+          select: { id: true },
+        });
+
+        // Créer immédiatement les ressources par défaut
+        await createDefaultCategoriesForShop(shop.id);
+        await createDefaultBadgesForShop(shop.id);
+        await createDefaultRolesForShop(shop.id);
+      }
+
+      return shop?.id || null;
+    }
+
+    // Option 3: Fallback sur host pour développement
+    const host = headersList.get("host") || "";
+    if (host.includes("localhost")) {
+      // En développement, utiliser une boutique par défaut
+      const defaultShop = await prisma.shop.findFirst({
+        select: { id: true },
+      });
+      return defaultShop?.id || null;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error getting shopId from context:", error);
+    return null;
   }
 }
 
@@ -414,6 +505,47 @@ export async function createDefaultCategoriesForShop(shopId: string) {
     });
   }
 
+}
+
+/**
+ * Helper pour créer les 3 rôles par défaut lors de la création d'un shop
+ */
+export async function createDefaultRolesForShop(shopId: string) {
+  const defaultRoles = [
+    {
+      name: "ADMIN",
+      displayName: "Administrateur",
+      color: "#EF4444",
+      permissions: ["MANAGE_USERS", "MANAGE_POSTS", "MANAGE_COMMENTS", "DELETE_POSTS", "DELETE_COMMENTS", "BAN_USERS", "MANAGE_CATEGORIES", "MANAGE_BADGES"],
+      isDefault: true,
+    },
+    {
+      name: "MODERATOR",
+      displayName: "Modérateur",
+      color: "#3B82F6",
+      permissions: ["MANAGE_POSTS", "MANAGE_COMMENTS", "DELETE_COMMENTS"],
+      isDefault: true,
+    },
+    {
+      name: "MEMBER",
+      displayName: "Membre",
+      color: "#10B981",
+      permissions: ["CREATE_POSTS", "CREATE_COMMENTS"],
+      isDefault: true,
+    },
+  ];
+
+  await prisma.role.createMany({
+    data: defaultRoles.map((role) => ({
+      shopId: shopId,
+      name: role.name,
+      displayName: role.displayName,
+      color: role.color,
+      permissions: role.permissions,
+      isDefault: role.isDefault,
+    })),
+    skipDuplicates: true, // Évite les erreurs si les rôles existent déjà
+  });
 }
 
 /**

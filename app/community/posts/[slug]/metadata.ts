@@ -1,12 +1,13 @@
 import { Metadata } from 'next';
 import { PrismaClient } from '@prisma/client';
-import { 
-  generateSEOTitle, 
-  truncateForSEO, 
-  generateSEOKeywords, 
+import {
+  generateSEOTitle,
+  truncateForSEO,
+  generateSEOKeywords,
   generateCanonicalURL,
-  generateOGImageURL 
+  generateOGImageURL
 } from '@/lib/seo';
+import { getShopLogo } from '@/lib/shopLogo';
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,7 @@ interface PostForMetadata {
   imageUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
+  shopId: string;
   author: {
     name: string | null;
   };
@@ -52,6 +54,7 @@ async function getPostBySlug(slug: string): Promise<PostForMetadata | null> {
         imageUrl: true,
         createdAt: true,
         updatedAt: true,
+        shopId: true,
         author: {
           select: { name: true }
         },
@@ -116,7 +119,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     post.shop.shopName
   );
   const canonicalUrl = generateCanonicalURL(post.slug || post.id);
-  const imageUrl = post.imageUrl || generateOGImageURL(post.title);
+
+  // Récupérer le logo du shop pour l'image OG
+  const logoUrl = await getShopLogo(post.shopId, post.shop.shopName);
+
+  // Générer l'image OG avec toutes les infos
+  const imageUrl = post.imageUrl || generateOGImageURL(
+    post.title,
+    post.shop.shopName,
+    {
+      category: post.category?.name,
+      author: post.author.name || undefined,
+      logoUrl: logoUrl,
+    }
+  );
 
   return {
     title,

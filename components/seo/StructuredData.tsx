@@ -29,6 +29,7 @@ interface PostStructuredDataProps {
     shop: {
       shopName: string;
       shopDomain: string;
+      logoUrl?: string | null;
     };
     _count?: {
       comments: number;
@@ -87,7 +88,11 @@ export function PostStructuredData({
 
   const structuredData = generateArticleStructuredData(
     postForStructuredData,
-    post.shop,
+    {
+      shopName: post.shop.shopName,
+      shopDomain: post.shop.shopDomain,
+      logoUrl: post.shop.logoUrl,
+    },
     commentsForStructuredData
       ? commentsForStructuredData.map((comment) => ({
           ...comment,

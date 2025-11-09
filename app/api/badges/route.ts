@@ -7,7 +7,7 @@ import { createDefaultBadgesForShop } from "@/lib/defaultBadges";
 
 const prisma = new PrismaClient();
 
-// GET - Récupérer les badges d'une boutique, avec fallback utilisateur
+// GET - Récupérer les badges d'une boutique
 export async function GET(request: NextRequest) {
   try {
     // 🏪 ISOLATION MULTI-TENANT
@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
-    const forumId = searchParams.get("forumId"); // Support futur pour l'isolation par forum
 
     // 1) Si userId fourni, valider qu'il appartient à cette boutique
     if (userId) {
@@ -34,13 +33,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2) Retourner tous les badges de la boutique (paliers globaux)
+    // 2) Retourner tous les badges de la boutique
     const shopBadgeWhere: any = { shopId };
-
-    // TODO: Ajouter l'isolation par forum une fois le modèle Forum créé
-    // if (forumId) {
-    //   shopBadgeWhere.forumId = forumId;
-    // }
 
     const shopBadges = await prisma.badge.findMany({
       where: shopBadgeWhere,
@@ -78,7 +72,7 @@ export async function POST(request: NextRequest) {
     ensureShopIsolation(shopId);
 
     const body = await request.json();
-    const { userId: providedUserId, forumId } = body; // Support futur pour l'isolation par forum
+    const { userId: providedUserId } = body;
 
     // Résoudre l'utilisateur admin agissant
     const userId = await resolveActingAdmin(providedUserId, shopId);
@@ -120,11 +114,6 @@ export async function POST(request: NextRequest) {
       isDefault: false,
       shopId, // ✅ ASSOCIER À LA BOUTIQUE
     };
-
-    // TODO: Ajouter l'association au forum une fois le modèle Forum créé
-    // if (forumId) {
-    //   badgeData.forumId = forumId;
-    // }
 
     const badge = await prisma.badge.create({
       data: badgeData,
