@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useShopifyAuth } from "@/components/ShopifyAuthProvider";
 import { shopifyAuthenticatedFetch } from "@/lib/shopifyAppBridge";
 
@@ -22,10 +23,10 @@ interface AuthVerification {
 }
 
 /**
- * Page embedded Shopify avec App Bridge
+ * Contenu de la page embedded Shopify avec App Bridge
  * Cette page démontre l'utilisation des session tokens Shopify
  */
-export default function ShopifyEmbeddedPage() {
+function ShopifyEmbeddedContent() {
   const searchParams = useSearchParams();
   const { isAuthenticated, isLoading, user } = useShopifyAuth();
   const [verificationData, setVerificationData] = useState<AuthVerification | null>(null);
@@ -280,16 +281,34 @@ export default function ShopifyEmbeddedPage() {
             >
               Tester l'authentification
             </button>
-            <a
+            <Link
               href="/"
               className="block w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg text-center transition-colors"
             >
               Aller au forum
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * Page wrapper avec Suspense boundary
+ */
+export default function ShopifyEmbeddedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    }>
+      <ShopifyEmbeddedContent />
+    </Suspense>
   );
 }
 

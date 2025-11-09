@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Promouvoir l'utilisateur
-    const updatedUser = await promoteUserToAdmin(targetUserId, user.id, shopId);
+    const updatedUser = await promoteUserToAdmin(targetUserId, auth.userId, shopId);
     
     return NextResponse.json({
       success: true,

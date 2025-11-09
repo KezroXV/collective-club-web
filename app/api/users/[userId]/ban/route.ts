@@ -93,7 +93,7 @@ export async function POST(
       data: {
         isBanned: true,
         bannedAt: new Date(),
-        bannedBy: currentUser.id
+        bannedBy: auth.userId
       },
       select: {
         id: true,
