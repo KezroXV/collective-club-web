@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { requireAuthAdmin } from "@/lib/auth-context";
+import { requireAuthAdmin } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -37,8 +37,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await requireAuthAdmin();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE - Admin uniquement (supporte Shopify + NextAuth)
+    const auth = await requireAuthAdmin(request);
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const body = await request.json();

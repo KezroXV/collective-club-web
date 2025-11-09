@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -271,8 +271,17 @@ export async function DELETE(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const { postId } = await params;
@@ -299,9 +308,9 @@ export async function DELETE(
 
     // ✅ SÉCURITÉ: Vérifier les permissions de suppression avec l'utilisateur authentifié
     const canDelete =
-      user.role === 'ADMIN' ||                    // Admin peut tout supprimer
-      user.role === 'MODERATOR' ||                // Modérateur peut tout supprimer
-      post.author.id === user.id;                 // Auteur peut supprimer ses posts
+      auth.role === 'ADMIN' ||                    // Admin peut tout supprimer
+      auth.role === 'MODERATOR' ||                // Modérateur peut tout supprimer
+      post.author.id === auth.userId;             // Auteur peut supprimer ses posts
 
     if (!canDelete) {
       return NextResponse.json(

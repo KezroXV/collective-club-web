@@ -5,6 +5,7 @@ import "../styles/theme.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
+import { ShopifyAuthProviderWrapper } from "@/components/providers/shopify-auth-provider-wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,12 +33,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthSessionProvider>
-          <ThemeProvider>
-            <div className="min-h-screen bg-background font-sans antialiased">
-              {children}
-            </div>
-            <Toaster position="bottom-right" />
-          </ThemeProvider>
+          <ShopifyAuthProviderWrapper>
+            <ThemeProvider>
+              <div className="min-h-screen bg-background font-sans antialiased">
+                {children}
+              </div>
+              <Toaster position="bottom-right" />
+            </ThemeProvider>
+          </ShopifyAuthProviderWrapper>
         </AuthSessionProvider>
       </body>
     </html>

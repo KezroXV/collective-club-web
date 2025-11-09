@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -11,8 +11,17 @@ export async function DELETE(
   { params }: { params: Promise<{ commentId: string }> }
 ) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const { commentId } = await params;
@@ -39,9 +48,9 @@ export async function DELETE(
 
     // ✅ SÉCURITÉ: Vérifier les permissions de suppression avec l'utilisateur authentifié
     const canDelete =
-      comment.author.id === user.id ||  // L'auteur peut supprimer son propre commentaire
-      user.role === 'ADMIN' ||          // Les admins peuvent tout supprimer
-      user.role === 'MODERATOR';        // Les modérateurs peuvent tout supprimer
+      comment.author.id === auth.userId ||  // L'auteur peut supprimer son propre commentaire
+      auth.role === 'ADMIN' ||              // Les admins peuvent tout supprimer
+      auth.role === 'MODERATOR';            // Les modérateurs peuvent tout supprimer
 
     if (!canDelete) {
       return NextResponse.json(

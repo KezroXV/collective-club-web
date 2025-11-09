@@ -5,7 +5,7 @@ import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
 import { updateOnboardingTask } from "@/lib/onboarding";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -59,8 +59,17 @@ export async function POST(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const { postId } = await params;
@@ -75,7 +84,7 @@ export async function POST(
     }
 
     // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
-    const userId = user.id;
+    const userId = auth.userId;
 
     // Vérifier si l'user a déjà réagi à ce post (dans cette boutique)
     const existingReaction = await prisma.reaction.findFirst({

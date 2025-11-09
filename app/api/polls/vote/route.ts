@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const body = await request.json();
@@ -22,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
-    const userId = user.id;
+    const userId = auth.userId;
 
     // Vérifier si l'utilisateur a déjà voté (dans cette boutique)
     const existingVote = await prisma.pollVote.findUnique({
@@ -111,8 +120,17 @@ export async function GET(request: NextRequest) {
 // Supprimer le vote de l'utilisateur (toggle off, isolé par boutique)
 export async function DELETE(request: NextRequest) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const body = await request.json();
@@ -126,7 +144,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // ✅ SÉCURITÉ: Utiliser l'userId de la session authentifiée
-    const userId = user.id;
+    const userId = auth.userId;
 
     const existingVote = await prisma.pollVote.findFirst({
       where: {

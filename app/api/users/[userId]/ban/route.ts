@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -13,18 +13,27 @@ export async function POST(
   try {
     console.log('BAN API POST: Starting request');
 
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user: currentUser, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
-    console.log('BAN API POST: Authenticated user', { userId: currentUser.id, role: currentUser.role, shopId });
+    console.log('BAN API POST: Authenticated user', { userId: auth.userId, role: auth.role, shopId, authMethod: auth.authMethod });
 
     const { userId: targetUserId } = await params;
 
-    console.log('BAN API POST: Request data', { targetUserId, currentUserId: currentUser.id, userRole: currentUser.role });
+    console.log('BAN API POST: Request data', { targetUserId, currentUserId: auth.userId, userRole: auth.role });
 
     // ✅ SÉCURITÉ: Vérifier les permissions depuis la session
-    if (!['ADMIN', 'MODERATOR'].includes(currentUser.role)) {
-      console.log('BAN API POST: Permission denied', { userRole: currentUser.role });
+    if (!['ADMIN', 'MODERATOR'].includes(auth.role)) {
+      console.log('BAN API POST: Permission denied', { userRole: auth.role });
       return NextResponse.json(
         { error: "Seuls les administrateurs et modérateurs peuvent bannir des utilisateurs" },
         { status: 403 }
@@ -127,14 +136,23 @@ export async function DELETE(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE via session NextAuth
-    const { user: currentUser, shopId } = await getAuthContext();
+    // ✅ SÉCURITÉ: Authentification OBLIGATOIRE (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
     ensureShopIsolation(shopId);
 
     const { userId: targetUserId } = await params;
 
     // ✅ SÉCURITÉ: Vérifier les permissions depuis la session
-    if (!['ADMIN', 'MODERATOR'].includes(currentUser.role)) {
+    if (!['ADMIN', 'MODERATOR'].includes(auth.role)) {
       return NextResponse.json(
         { error: "Seuls les administrateurs et modérateurs peuvent débannir des utilisateurs" },
         { status: 403 }

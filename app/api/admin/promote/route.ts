@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthContext, requireAuthAdmin } from "@/lib/auth-context";
+import { requireAuthAdmin } from "@/lib/hybridAuth";
 import { promoteUserToAdmin } from "@/lib/admin";
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier que l'utilisateur actuel est admin
-    const { user, shopId } = await requireAuthAdmin();
+    // Vérifier que l'utilisateur actuel est admin (supporte Shopify + NextAuth)
+    const auth = await requireAuthAdmin(request);
+    const shopId = auth.shopId;
     
     const body = await request.json();
     const { targetUserId } = body;

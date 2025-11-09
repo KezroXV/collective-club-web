@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 import { updateOnboardingTask } from "@/lib/onboarding";
 
 const prisma = new PrismaClient();
@@ -145,10 +145,19 @@ export async function POST(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    // 🔐 AUTHENTICATION: Vérifier que l'utilisateur est connecté
-    const { user, shopId } = await getAuthContext();
+    // 🔐 AUTHENTICATION: Vérifier que l'utilisateur est connecté (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
     
-    console.log("💬 Creating comment:", { userId: user.id, role: user.role, shopId });
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+    
+    const shopId = auth.shopId;
+    
+    console.log("💬 Creating comment:", { userId: auth.userId, role: auth.role, shopId, authMethod: auth.authMethod });
 
     const { postId } = await params;
     const body = await request.json();
@@ -161,7 +170,7 @@ export async function POST(
       );
     }
 
-    const authorId = user.id;
+    const authorId = auth.userId;
 
     // Si parentId est fourni, vérifier que le commentaire parent existe
     if (parentId) {

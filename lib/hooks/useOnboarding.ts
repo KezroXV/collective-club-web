@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { smartFetch } from "@/lib/smartFetch";
 
 interface OnboardingData {
   hasLikedPost: boolean;
@@ -24,7 +25,7 @@ export function useOnboarding(userId?: string) {
     }
 
     try {
-      const response = await fetch(`/api/onboarding`);
+      const response = await smartFetch(`/api/onboarding`);
       if (response.ok) {
         const data = await response.json();
         setOnboarding(data);

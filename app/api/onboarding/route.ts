@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthContext } from "@/lib/hybridAuth";
 import { PrismaClient } from "@prisma/client";
 import { getShopContext } from "@/lib/shopIsolation";
 
@@ -9,13 +8,13 @@ const prisma = new PrismaClient();
 // GET - Récupérer l'état d'onboarding d'un utilisateur
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const auth = await getAuthContext(request);
+    if (!auth) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
     const { shopId } = await getShopContext(request);
-    const userId = session.user.id;
+    const userId = auth.userId;
 
     // Récupérer ou créer l'onboarding
     let onboarding = await prisma.userOnboarding.findUnique({
@@ -53,13 +52,13 @@ export async function GET(request: NextRequest) {
 // PUT - Mettre à jour l'état d'onboarding
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const auth = await getAuthContext(request);
+    if (!auth) {
       return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
     }
 
     const { shopId } = await getShopContext(request);
-    const userId = session.user.id;
+    const userId = auth.userId;
     const body = await request.json();
 
     const { hasLikedPost, hasCommentedPost, hasCreatedPost } = body;

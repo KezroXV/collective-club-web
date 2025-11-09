@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { awardPoints } from "@/lib/points";
 import { PointAction } from "@prisma/client";
-import { getAuthContext } from "@/lib/auth-context";
+import { getAuthContext } from "@/lib/hybridAuth";
 import { updateOnboardingTask } from "@/lib/onboarding";
 
 const prisma = new PrismaClient();
@@ -164,13 +164,23 @@ export async function GET(request: NextRequest) {
 // POST /api/posts - Créer un nouveau post avec sondage (isolé par boutique)
 export async function POST(request: NextRequest) {
   try {
-    // 🔐 AUTHENTICATION: Vérifier que l'utilisateur est connecté
-    const { user, shopId } = await getAuthContext();
+    // 🔐 AUTHENTICATION: Vérifier que l'utilisateur est connecté (supporte Shopify + NextAuth)
+    const auth = await getAuthContext(request);
+    
+    if (!auth) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const shopId = auth.shopId;
 
     console.log("📝 Creating post:", {
-      userId: user.id,
-      role: user.role,
+      userId: auth.userId,
+      role: auth.role,
       shopId,
+      authMethod: auth.authMethod,
     });
 
     const body = await request.json();
@@ -193,7 +203,7 @@ export async function POST(request: NextRequest) {
 
     // 🔒 SÉCURITÉ: Vérifier que l'utilisateur connecté peut poster
     // Tous les rôles peuvent créer des posts (ADMIN, MODERATOR, MEMBER)
-    const authorId = user.id;
+    const authorId = auth.userId;
 
     // Convertir category (nom) en categoryId avec isolation par boutique
     const foundCategory = await prisma.category.findUnique({

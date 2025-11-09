@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getAuthContext } from "@/lib/hybridAuth";
 
 const prisma = new PrismaClient();
 
@@ -13,9 +12,9 @@ export async function GET(request: NextRequest) {
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
 
-    // Vérifier l'authentification
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
+    // Vérifier l'authentification (supporte Shopify session tokens + NextAuth)
+    const auth = await getAuthContext(request);
+    if (!auth) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -25,7 +24,7 @@ export async function GET(request: NextRequest) {
     // Trouver l'utilisateur actuel
     const currentUser = await prisma.user.findFirst({
       where: {
-        email: session.user.email,
+        email: auth.email,
         shopId
       },
       select: {

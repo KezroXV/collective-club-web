@@ -193,3 +193,17 @@ export async function requireAuth(request: NextRequest): Promise<AuthContext> {
   }
   return context;
 }
+
+/**
+ * Middleware pour routes admin uniquement
+ * Retourne l'AuthContext ou throw une erreur
+ */
+export async function requireAuthAdmin(request: NextRequest): Promise<AuthContext> {
+  const context = await requireAuth(request);
+  
+  if (context.role !== "ADMIN") {
+    throw new Error("Admin access required");
+  }
+  
+  return context;
+}
