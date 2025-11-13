@@ -50,6 +50,19 @@ npx prisma studio
 npm run seed
 ```
 
+### 📧 Système d'Emailing
+```bash
+# Tester le système d'emailing (notifications + exports RGPD)
+npm run test:email
+
+# Tester avec un email spécifique
+TEST_EMAIL=votre-email@example.com npm run test:email
+```
+
+**Configuration** : Voir [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md)
+- Mode `console` (dev) : emails loggés dans la console
+- Mode `resend` (prod) : emails envoyés via Resend.com
+
 ## Architecture Multi-Tenant
 
 ### Navigation et URLs
@@ -128,19 +141,68 @@ npm run recovery backup <shopId>  # Avant toute intervention
 ## Variables d'environnement requises
 
 ```env
+# Base de données
 DATABASE_URL="postgresql://..."
-SHOPIFY_API_KEY="b4e0f05c3b167ee4454a2bb3785bf717"
+DIRECT_URL="postgresql://..."
+
+# NextAuth
+NEXTAUTH_SECRET="générer-avec-openssl-rand-base64-32"
+NEXTAUTH_URL="https://votredomaine.com"
+
+# Shopify
+SHOPIFY_CUSTOMER_CLIENT_ID="..."
+SHOPIFY_CUSTOMER_CLIENT_SECRET="..."
 SHOPIFY_API_SECRET="..."
-HOST="http://localhost:3000/"
+
+# Email (RGPD)
+EMAIL_PROVIDER="resend"  # ou "console" pour dev
+EMAIL_FROM="noreply@votredomaine.com"
+EMAIL_API_KEY="re_..."  # Clé API Resend
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+
+# URLs
+NEXT_PUBLIC_BASE_URL="https://votredomaine.com"
 NODE_ENV="production"
 ```
 
+**Guide complet** : Voir [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md)
+
 ## Déploiement
 
-1. **Build** : `npm run build`
-2. **Base de données** : `npx prisma db push`
-3. **Seeding** : `npm run seed` (optionnel)
-4. **Start** : `npm run start`
+**Guide de déploiement complet** : [docs/PRODUCTION_DEPLOYMENT.md](docs/PRODUCTION_DEPLOYMENT.md)
+
+### Déploiement rapide
+
+```bash
+# Build de production (avec Prisma)
+npm run vercel-build
+
+# Ou séparément
+npx prisma generate
+npx prisma migrate deploy
+npm run build
+
+# Démarrer en production
+npm start
+```
+
+### Services requis
+
+- **Base de données** : PostgreSQL (Neon, Supabase, etc.)
+- **Emails** : Resend.com (gratuit jusqu'à 3000 emails/mois)
+- **Images** : Cloudinary (gratuit jusqu'à 25 crédits/mois)
+- **Hébergement** : Vercel, Railway, Render, etc.
+
+### Webhooks Shopify (RGPD obligatoire)
+
+Configurez ces 3 webhooks dans Shopify Admin :
+- `customers/data_request` → `/api/webhooks/compliance`
+- `customers/redact` → `/api/webhooks/compliance`
+- `shop/redact` → `/api/webhooks/compliance`
 
 ## Maintenance
 

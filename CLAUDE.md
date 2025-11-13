@@ -40,6 +40,15 @@ npm run recovery -- clean               # Clean orphaned data
 npm run recovery -- migrate <sourceShopId> <targetShopId> [posts,categories,users]
 ```
 
+### Email System
+```bash
+npm run test:email           # Test email system (notifications + RGPD exports)
+```
+
+**Configuration**: See `docs/EMAIL_SETUP.md` for detailed setup instructions.
+- Provider: `console` (dev), `resend` (production recommended), `sendgrid`, or `webhook`
+- Configure `EMAIL_PROVIDER`, `EMAIL_API_KEY`, `EMAIL_FROM` in `.env`
+
 ## Architecture
 
 ### Multi-Tenant System

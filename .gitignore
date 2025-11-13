@@ -49,5 +49,6 @@ next-env.d.ts
 *.temp
 *.bak
 *~
+/temp/
 
 /lib/generated/prisma

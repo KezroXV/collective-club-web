@@ -12,7 +12,8 @@
     "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "admin": "tsx scripts/ensure-admin.ts",
     "recovery": "tsx scripts/data-recovery.ts",
-    "test:session-tokens": "tsx scripts/test-session-tokens.ts"
+    "test:session-tokens": "tsx scripts/test-session-tokens.ts",
+    "test:email": "tsx scripts/test-email.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.24",
@@ -40,6 +41,7 @@
     "cloudinary": "^2.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "lucide-react": "^0.540.0",
     "next": "15.4.7",
     "next-auth": "^4.24.11",
@@ -48,6 +50,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
+    "resend": "^6.4.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "twemoji": "^14.0.2",
