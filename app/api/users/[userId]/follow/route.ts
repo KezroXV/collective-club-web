@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { requireAuth } from '@/lib/apiAuth';
+import { getShopId } from '@/lib/shopIsolation';
 
 const prisma = new PrismaClient();
 
@@ -11,20 +13,19 @@ interface RouteParams {
 
 /**
  * POST /api/users/[userId]/follow - Suivre un utilisateur
+ * ✅ SÉCURISÉ: Utilise l'authentification et le shopId du contexte serveur
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
+    // ✅ SÉCURITÉ: Authentification obligatoire
+    const auth = await requireAuth(request);
+    const followerId = auth.userId; // ✅ De la session, pas du body
+
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas du client
+    const shopId = await getShopId(request);
+
     const resolvedParams = await params;
     const { userId: targetUserId } = resolvedParams;
-    const body = await request.json();
-    const { followerId, shopId } = body;
-
-    if (!followerId || !shopId) {
-      return NextResponse.json(
-        { error: 'followerId et shopId requis' },
-        { status: 400 }
-      );
-    }
 
     // Vérifier qu'on ne suit pas soi-même
     if (followerId === targetUserId) {
@@ -106,21 +107,19 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 /**
  * DELETE /api/users/[userId]/follow - Ne plus suivre un utilisateur
+ * ✅ SÉCURISÉ: Utilise l'authentification et le shopId du contexte serveur
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    // ✅ SÉCURITÉ: Authentification obligatoire
+    const auth = await requireAuth(request);
+    const followerId = auth.userId; // ✅ De la session, pas des params
+
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas des params
+    const shopId = await getShopId(request);
+
     const resolvedParams = await params;
     const { userId: targetUserId } = resolvedParams;
-    const { searchParams } = new URL(request.url);
-    const followerId = searchParams.get('followerId');
-    const shopId = searchParams.get('shopId');
-
-    if (!followerId || !shopId) {
-      return NextResponse.json(
-        { error: 'followerId et shopId requis' },
-        { status: 400 }
-      );
-    }
 
     // Vérifier que la relation de suivi existe
     const existingFollow = await prisma.follow.findUnique({
@@ -180,21 +179,19 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
 /**
  * GET /api/users/[userId]/follow - Vérifier si un utilisateur suit l'utilisateur cible
+ * ✅ SÉCURISÉ: Utilise l'authentification et le shopId du contexte serveur
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // ✅ SÉCURITÉ: Authentification obligatoire
+    const auth = await requireAuth(request);
+    const followerId = auth.userId; // ✅ De la session, pas des params
+
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas des params
+    const shopId = await getShopId(request);
+
     const resolvedParams = await params;
     const { userId: targetUserId } = resolvedParams;
-    const { searchParams } = new URL(request.url);
-    const followerId = searchParams.get('followerId');
-    const shopId = searchParams.get('shopId');
-
-    if (!followerId || !shopId) {
-      return NextResponse.json(
-        { error: 'followerId et shopId requis' },
-        { status: 400 }
-      );
-    }
 
     const isFollowing = await prisma.follow.findUnique({
       where: {

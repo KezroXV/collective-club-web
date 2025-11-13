@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getShopId } from '@/lib/shopIsolation';
 
 const prisma = new PrismaClient();
 
@@ -11,23 +12,19 @@ interface RouteParams {
 
 /**
  * GET /api/users/[userId]/following - Récupérer la liste des abonnements d'un utilisateur
+ * ✅ SÉCURISÉ: Utilise le shopId du contexte serveur
  */
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas des params
+    const shopId = await getShopId(request);
+
     const resolvedParams = await params;
     const { userId } = resolvedParams;
     const { searchParams } = new URL(request.url);
-    const shopId = searchParams.get('shopId');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
-
-    if (!shopId) {
-      return NextResponse.json(
-        { error: 'shopId requis' },
-        { status: 400 }
-      );
-    }
 
     // Vérifier que l'utilisateur existe dans cette boutique
     const user = await prisma.user.findFirst({

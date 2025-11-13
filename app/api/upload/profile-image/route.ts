@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from 'cloudinary';
+import { requireAuth } from "@/lib/apiAuth";
 
 // Vérification des variables d'environnement
 const cloudinaryConfig = {
@@ -8,16 +9,14 @@ const cloudinaryConfig = {
   api_secret: process.env.CLOUDINARY_API_SECRET,
 };
 
-console.log('Cloudinary config check:', {
-  cloud_name: cloudinaryConfig.cloud_name ? 'SET' : 'MISSING',
-  api_key: cloudinaryConfig.api_key ? 'SET' : 'MISSING',
-  api_secret: cloudinaryConfig.api_secret ? 'SET' : 'MISSING',
-});
-
 cloudinary.config(cloudinaryConfig);
 
+// ✅ SÉCURISÉ: Upload d'images avec authentification obligatoire
 export async function POST(request: NextRequest) {
   try {
+    // ✅ SÉCURITÉ: Authentification obligatoire pour upload
+    const auth = await requireAuth(request);
+
     // Vérifier que toutes les variables d'environnement sont présentes
     if (!cloudinaryConfig.cloud_name || !cloudinaryConfig.api_key || !cloudinaryConfig.api_secret) {
       console.error('Missing Cloudinary environment variables');
@@ -47,10 +46,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
+    // Vérifier le type MIME
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Only image files are allowed" },
+        { error: "Only JPEG, PNG, GIF, and WebP images are allowed" },
         { status: 400 }
       );
     }
@@ -58,6 +58,26 @@ export async function POST(request: NextRequest) {
     // Convertir le fichier en buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // ✅ SÉCURITÉ: Vérifier les magic bytes (header du fichier)
+    const magicBytes = buffer.slice(0, 4).toString('hex');
+    const validMagicBytes: Record<string, string[]> = {
+      'image/jpeg': ['ffd8ffe0', 'ffd8ffe1', 'ffd8ffe2', 'ffd8ffe3', 'ffd8ffe8'],
+      'image/png': ['89504e47'],
+      'image/gif': ['47494638'],
+      'image/webp': ['52494646'], // RIFF
+    };
+
+    const isValidFormat = Object.entries(validMagicBytes).some(([type, signatures]) => {
+      return file.type === type && signatures.some(sig => magicBytes.startsWith(sig));
+    });
+
+    if (!isValidFormat) {
+      return NextResponse.json(
+        { error: "Invalid file format - file header mismatch" },
+        { status: 400 }
+      );
+    }
 
     // Upload vers Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {

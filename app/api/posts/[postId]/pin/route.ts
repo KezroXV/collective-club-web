@@ -1,45 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { requireModerator } from "@/lib/apiAuth";
 
 const prisma = new PrismaClient();
 
 // POST /api/posts/[postId]/pin - Épingler un post
+// ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    console.log('PIN API POST: Starting request');
-    
+    // ✅ SÉCURITÉ: Authentification et vérification rôle ADMIN/MODERATOR
+    const auth = await requireModerator(request);
+
     // 🏪 ISOLATION MULTI-TENANT
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
-    console.log('PIN API POST: ShopId obtained', { shopId });
 
     const { postId } = await params;
-    const body = await request.json();
-    const { userId, userRole } = body;
-    
-    console.log('PIN API POST: Request data', { postId, userId, userRole });
-
-    if (!userId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier les permissions - seulement Admin et Modérateur peuvent épingler
-    if (!['ADMIN', 'MODERATOR'].includes(userRole)) {
-      console.log('PIN API POST: Permission denied', { userRole });
-      return NextResponse.json(
-        { error: "Seuls les administrateurs et modérateurs peuvent épingler des posts" },
-        { status: 403 }
-      );
-    }
-
-    console.log('PIN API POST: Permissions OK');
 
     // Vérifier que le post existe et appartient à la bonne boutique
     const post = await prisma.post.findFirst({
@@ -49,21 +29,15 @@ export async function POST(
       }
     });
 
-    console.log('PIN API POST: Post query result', { found: !!post, postId, shopId });
-
     if (!post) {
-      console.log('PIN API POST: Post not found');
       return NextResponse.json(
         { error: "Post not found in this shop" },
         { status: 404 }
       );
     }
 
-    console.log('PIN API POST: Post found', { isPinned: post.isPinned });
-
     // Vérifier si le post n'est pas déjà épinglé
     if (post.isPinned) {
-      console.log('PIN API POST: Post already pinned');
       return NextResponse.json(
         { error: "Post is already pinned" },
         { status: 400 }
@@ -110,33 +84,20 @@ export async function POST(
 }
 
 // DELETE /api/posts/[postId]/pin - Désépingler un post
+// ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
+    // ✅ SÉCURITÉ: Authentification et vérification rôle ADMIN/MODERATOR
+    const auth = await requireModerator(request);
+
     // 🏪 ISOLATION MULTI-TENANT
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
 
     const { postId } = await params;
-    const body = await request.json();
-    const { userId, userRole } = body;
-
-    if (!userId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier les permissions - seulement Admin et Modérateur peuvent désépingler
-    if (!['ADMIN', 'MODERATOR'].includes(userRole)) {
-      return NextResponse.json(
-        { error: "Seuls les administrateurs et modérateurs peuvent désépingler des posts" },
-        { status: 403 }
-      );
-    }
 
     // Vérifier que le post existe et appartient à la bonne boutique
     const post = await prisma.post.findFirst({

@@ -1,24 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserPointsData, awardPoints } from '@/lib/points';
 import { PointAction } from '@prisma/client';
+import { requireAuth, requireAdmin } from '@/lib/apiAuth';
+import { getShopId } from '@/lib/shopIsolation';
 
 /**
  * GET /api/users/points - Récupérer les points de l'utilisateur courant
+ * ✅ SÉCURISÉ: Utilise l'authentification et shopId du contexte serveur
  */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const shopId = searchParams.get('shopId');
+    // ✅ SÉCURITÉ: Authentification obligatoire
+    const auth = await requireAuth(request);
 
-    if (!userId || !shopId) {
-      return NextResponse.json(
-        { error: 'userId et shopId requis' },
-        { status: 400 }
-      );
-    }
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas des params
+    const shopId = await getShopId(request);
 
-    const userPointsData = await getUserPointsData(userId, shopId);
+    const userPointsData = await getUserPointsData(auth.userId, shopId);
     
     return NextResponse.json({
       points: userPointsData.points,
@@ -36,23 +34,22 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/users/points - Ajouter des points à un utilisateur (admin seulement)
+ * ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
  */
 export async function POST(request: NextRequest) {
   try {
+    // ✅ SÉCURITÉ: Authentification et vérification rôle ADMIN
+    const auth = await requireAdmin(request);
+
+    // ✅ SÉCURITÉ: shopId du contexte serveur, pas du body
+    const shopId = await getShopId(request);
+
     const body = await request.json();
-    const { userId, shopId, action, points: customPoints, currentUserRole } = body;
+    const { userId, action, points: customPoints } = body;
 
-    // Vérifier que l'utilisateur courant est admin
-    if (currentUserRole !== 'ADMIN') {
+    if (!userId || !action) {
       return NextResponse.json(
-        { error: 'Accès non autorisé' },
-        { status: 403 }
-      );
-    }
-
-    if (!userId || !shopId || !action) {
-      return NextResponse.json(
-        { error: 'userId, shopId et action requis' },
+        { error: 'userId et action requis' },
         { status: 400 }
       );
     }

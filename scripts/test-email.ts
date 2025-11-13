@@ -37,17 +37,17 @@ function generateMockUserData(): UserDataExport {
       name: 'Test User',
       image: 'https://example.com/avatar.jpg',
       createdAt: new Date('2024-01-15T10:00:00Z').toISOString(),
+      updatedAt: new Date('2024-01-15T10:00:00Z').toISOString(),
       role: 'MEMBER',
       isShopOwner: false,
       isBanned: false,
-      points: 150,
-      badges: [],
+      bannedAt: null,
     },
     accounts: [
       {
         provider: 'google',
         providerAccountId: 'google-123456',
-        createdAt: new Date('2024-01-15T10:00:00Z').toISOString(),
+        createdDate: new Date('2024-01-15T10:00:00Z').toISOString(),
       },
     ],
     posts: [
@@ -56,27 +56,32 @@ function generateMockUserData(): UserDataExport {
         title: 'Mon premier post de test',
         content: 'Ceci est un contenu de test pour vérifier l\'export RGPD.',
         slug: 'mon-premier-post-de-test',
+        imageUrl: null,
+        isPinned: false,
+        status: 'PUBLISHED',
+        categoryName: 'Général',
         createdAt: new Date('2024-01-16T14:30:00Z').toISOString(),
         updatedAt: new Date('2024-01-16T14:30:00Z').toISOString(),
-        isPinned: false,
-        views: 42,
-        category: 'Général',
+        reactionsCount: 1,
+        commentsCount: 1,
       },
     ],
     comments: [
       {
         id: 'comment-1',
         content: 'Super post!',
-        postId: 'post-1',
+        postTitle: 'Mon premier post de test',
+        parentCommentId: null,
         createdAt: new Date('2024-01-17T09:15:00Z').toISOString(),
         updatedAt: new Date('2024-01-17T09:15:00Z').toISOString(),
+        reactionsCount: 0,
       },
     ],
     reactions: [
       {
         id: 'reaction-1',
         type: 'LIKE',
-        targetType: 'POST',
+        targetType: 'post',
         targetId: 'post-1',
         createdAt: new Date('2024-01-18T11:20:00Z').toISOString(),
       },
@@ -91,14 +96,12 @@ function generateMockUserData(): UserDataExport {
       badges: [],
       pointTransactions: [
         {
-          id: 'trans-1',
           points: 50,
           action: 'POST_CREATED',
           description: 'Création d\'un post',
           createdAt: new Date('2024-01-16T14:30:00Z').toISOString(),
         },
         {
-          id: 'trans-2',
           points: 10,
           action: 'COMMENT_CREATED',
           description: 'Ajout d\'un commentaire',
@@ -178,7 +181,6 @@ Nom: ${mockUserData.personalInformation.name}
 Email: ${mockUserData.personalInformation.email}
 Rôle: ${mockUserData.personalInformation.role}
 Date de création: ${mockUserData.personalInformation.createdAt}
-Points: ${mockUserData.personalInformation.points}
 
 ───────────────────────────────────────────────────
 📊 STATISTIQUES

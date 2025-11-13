@@ -2,25 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
+import { requireAuth } from "@/lib/apiAuth";
 
 const prisma = new PrismaClient();
 
 // GET - Récupérer les paramètres de personnalisation (isolés par boutique)
+// ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
 export async function GET(request: NextRequest) {
   try {
+    // ✅ SÉCURITÉ: Authentification obligatoire
+    const auth = await requireAuth(request);
+    const userId = auth.userId; // ✅ De la session, pas des params
+
     // 🏪 ISOLATION MULTI-TENANT
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
-
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "userId is required" },
-        { status: 400 }
-      );
-    }
 
     // Vérifier que l'utilisateur existe dans cette boutique
     const user = await prisma.user.findFirst({

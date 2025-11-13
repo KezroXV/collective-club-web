@@ -2,45 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getShopId, ensureShopIsolation } from "@/lib/shopIsolation";
 import { logger } from "@/lib/logger";
+import { requireAdmin } from "@/lib/apiAuth";
 
 const prisma = new PrismaClient();
 
 // DELETE /api/users/[userId] - Supprimer un utilisateur définitivement
+// ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     logger.api('/api/users/[userId]', 'DELETE request');
-    
+
+    // ✅ SÉCURITÉ: Authentification et vérification rôle ADMIN
+    const auth = await requireAdmin(request);
+    const currentUserId = auth.userId; // ✅ De la session, pas du body
+
     // 🏪 ISOLATION MULTI-TENANT
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
     logger.debug('ShopId obtained', { shopId });
 
     const { userId: targetUserId } = await params;
-    const body = await request.json();
-    const { userId: currentUserId, userRole } = body;
-    
-    logger.debug('Request data', { targetUserId, currentUserId, userRole });
 
-    if (!currentUserId || !userRole) {
-      return NextResponse.json(
-        { error: "User ID and role are required" },
-        { status: 400 }
-      );
-    }
-
-    // Vérifier les permissions - seulement les ADMIN peuvent supprimer
-    if (userRole !== 'ADMIN') {
-      logger.debug('Permission denied', { userRole });
-      return NextResponse.json(
-        { error: "Seuls les administrateurs peuvent supprimer des utilisateurs" },
-        { status: 403 }
-      );
-    }
-
-    logger.debug('Permissions OK');
+    logger.debug('Request data', { targetUserId, currentUserId });
 
     // Vérifier que l'utilisateur cible existe et appartient à la bonne boutique
     const targetUser = await prisma.user.findFirst({
@@ -106,13 +92,18 @@ export async function DELETE(
 }
 
 // PUT /api/users/[userId] - Modifier le rôle d'un utilisateur
+// ✅ SÉCURISÉ: Utilise l'authentification du contexte serveur
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     logger.api('/api/users/[userId]', 'PUT request');
-    
+
+    // ✅ SÉCURITÉ: Authentification et vérification rôle ADMIN
+    const auth = await requireAdmin(request);
+    const currentUserId = auth.userId; // ✅ De la session, pas du body
+
     // 🏪 ISOLATION MULTI-TENANT
     const shopId = await getShopId(request);
     ensureShopIsolation(shopId);
@@ -120,23 +111,14 @@ export async function PUT(
 
     const { userId: targetUserId } = await params;
     const body = await request.json();
-    const { userId: currentUserId, userRole, newRole } = body;
-    
-    logger.debug('Request data', { targetUserId, currentUserId, userRole, newRole });
+    const { newRole } = body;
 
-    if (!currentUserId || !userRole || !newRole) {
+    logger.debug('Request data', { targetUserId, currentUserId, newRole });
+
+    if (!newRole) {
       return NextResponse.json(
-        { error: "User ID, role and new role are required" },
+        { error: "New role is required" },
         { status: 400 }
-      );
-    }
-
-    // Vérifier les permissions - seulement les ADMIN peuvent modifier les rôles
-    if (userRole !== 'ADMIN') {
-      logger.debug('Permission denied', { userRole });
-      return NextResponse.json(
-        { error: "Seuls les administrateurs peuvent modifier les rôles" },
-        { status: 403 }
       );
     }
 
